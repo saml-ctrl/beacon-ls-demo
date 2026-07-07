@@ -115,6 +115,9 @@ export default defineConfig({
         /(salesforce-lightning-design-system\.min\.css|slds2\.cosmos\.css)(\?.*)?$/,
         // Global styles loaded via new URL() pattern must also bypass LWC plugin
         /\/styles\/global\.css(\?.*)?$/,
+        // Mermaid (diagram rendering) is plain ESM, not LWC — its modern syntax
+        // (static class blocks) breaks the LWC babel transform.
+        /node_modules[/\\]mermaid[/\\]/,
         ...iconTemplateExcludeDirs,
       ],
     }),

@@ -40,6 +40,20 @@ docked Journey bar) restores the exact seed state at any time; a hard refresh do
 story: intake → conversion → pipeline → contracting → closed won → onboarding → handoff →
 change order → leadership view.” Each numbered node jumps to its screen; the Journey bar
 does the same thing in order.
+**Show:** the **Architecture & Flow Diagrams** card — four tabs that tell the same story
+as pictures, useful for the architects in the room:
+
+- **Integration Data Flow** — every system in the future state and which direction data
+  moves: Citeline / ClinicalTrials.gov through MuleSoft into Research Studies, Clay and
+  MCAE into Leads, SharePoint quoting, Adobe Acrobat Sign on the Contract, Slack deal
+  channels, and the Asana delivery handoff with project-status sync back through MuleSoft.
+- **User Journey** — the presenter journey by persona: Priya (BD Coordinator) on triage,
+  Jordan (BD rep) selling and contracting, Sam (ClinOps PM) on delivery handoff.
+- **Core Sales Workflow** — the Sales Path stages with the three hard gates drawn as
+  decision diamonds (CBO review, Award Letter, signed contract), the Closed Won side
+  effects, and the Change Order loop.
+- **Contracting Sequence** — the Adobe Acrobat Sign handshake step by step, including the
+  signed-status callback and the Shield Field Audit Trail entry.
 
 ## Step 1 — Trial Intake & Triage
 
@@ -64,6 +78,14 @@ Sites** (note the Account record type column — Organization vs Clinical Site) 
 **PI / KOL records landing as Leads** tied to the study — Dr. Elena Vasquez, the PI at
 Lakeshore Neuroscience Institute, and Dr. Naomi Kessler, the sponsor’s VP of Clinical
 Development.”
+**Show (account hierarchy):** the site roster’s **Site Network** column — most sites roll
+up to a site-network **Organization** account (Lakeshore Health Network, Meridian Care
+Alliance, Pacific Crest Research Partners) via **Parent Account**; a few are independent.
+Click into any site: the **Account Hierarchy** card on its Details tab draws the network
+roll-up as a tree, with every node clickable. On the network account itself, the Related
+tab adds a **Child Accounts** list, and the Accounts tab has a dedicated **Site Networks**
+list view. “This is standard Account hierarchy — no custom objects — so network-level
+relationships, contacts, and reporting come for free.”
 **Pause on:** amber chip **“Research Study object model”** — standard Life Sciences Cloud
 object vs custom object is explicitly undecided; this is a discovery decision.
 

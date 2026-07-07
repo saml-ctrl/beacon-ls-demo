@@ -1,0 +1,4 @@
+.c-mermaid {
+    overflow-x: auto;
+    padding: var(--slds-g-spacing-2, 0.5rem) 0;
+}

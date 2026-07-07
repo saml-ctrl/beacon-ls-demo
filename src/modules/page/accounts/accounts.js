@@ -1,6 +1,6 @@
 import { LightningElement, track } from 'lwc';
 import { navigate } from '../../../router';
-import { IDS, getAccounts, subscribeStore } from 'data/store';
+import { IDS, getAccounts, getAccount, subscribeStore } from 'data/store';
 
 const COLUMNS = [
     {
@@ -12,7 +12,8 @@ const COLUMNS = [
         typeAttributes: { label: { fieldName: 'name' }, variant: 'base', name: 'view' },
     },
     { label: 'Record Type', fieldName: 'recordType', sortable: true, initialWidth: 140 },
-    { label: 'City', fieldName: 'city', sortable: true, initialWidth: 150 },
+    { label: 'Parent Account', fieldName: 'parentName', sortable: true, initialWidth: 200 },
+    { label: 'City', fieldName: 'city', sortable: true, initialWidth: 140 },
     { label: 'State', fieldName: 'state', initialWidth: 80 },
     { label: 'Tier', fieldName: 'tier' },
     { label: 'Phone', fieldName: 'phone', type: 'phone', initialWidth: 150 },
@@ -24,7 +25,8 @@ const COLUMNS = [
 
 const LIST_VIEWS = [
     { value: 'all', label: 'All Accounts', filter: () => true },
-    { value: 'orgs', label: 'Sponsor Organizations', filter: (a) => a.recordType === 'Organization' },
+    { value: 'orgs', label: 'Sponsor Organizations', filter: (a) => a.recordType === 'Organization' && a.organizationType !== 'Site Network' },
+    { value: 'networks', label: 'Site Networks', filter: (a) => a.organizationType === 'Site Network' },
     { value: 'sites', label: 'Clinical Sites', filter: (a) => a.recordType === 'Clinical Site' },
     { value: 'roster', label: 'NRX-214-202 Site Roster', filter: (a) => a.recordType === 'Clinical Site' && a.studyId === IDS.study },
 ];
@@ -47,7 +49,10 @@ export default class Accounts extends LightningElement {
     }
 
     refresh() {
-        this.rows = getAccounts().map((a) => ({ ...a }));
+        this.rows = getAccounts().map((a) => ({
+            ...a,
+            parentName: a.parentAccountId ? (getAccount(a.parentAccountId)?.name || '') : '',
+        }));
         this.sortRows(this.sortedBy, this.sortedDirection);
     }
 

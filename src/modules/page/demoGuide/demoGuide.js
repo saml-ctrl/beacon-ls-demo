@@ -17,6 +17,97 @@ const DESCRIPTIONS = {
     11: 'Leadership dashboards — every number computed live from the demo store.',
 };
 
+/** Mermaid sources for the Architecture & Flow Diagrams card. */
+const DIAGRAM_INTEGRATIONS = `flowchart LR
+    subgraph SRC["External sources"]
+        CIT[Citeline]
+        CTG[ClinicalTrials.gov]
+        CLAY[Clay]
+    end
+    MULE[MuleSoft]
+    subgraph SF["Salesforce Life Sciences Cloud"]
+        RS[Research Studies]
+        LD[Leads]
+        OPP[Opportunity]
+        CT[Contract]
+        DASH[Dashboards]
+    end
+    MCAE[Marketing Cloud Account Engagement]
+    SP[SharePoint quote sheets]
+    SIGN[Adobe Acrobat Sign]
+    SLACK[Slack deal channel]
+    ASANA[Asana delivery project]
+
+    CIT --> MULE
+    CTG --> MULE
+    MULE -->|Study ingestion| RS
+    RS -->|Auto-create sites and PI or KOL leads| LD
+    CLAY -->|One-time enrichment on assignment| LD
+    MCAE <-->|Engagement history| LD
+    LD -->|Custom conversion| OPP
+    OPP -->|Quote workspace| SP
+    OPP -->|Deal room| SLACK
+    OPP --> CT
+    CT <-->|Send and signed callback| SIGN
+    OPP -->|Closed Won handoff| ASANA
+    ASANA -->|Project status sync| MULE
+    OPP -->|Live rollups| DASH`;
+
+const DIAGRAM_JOURNEY = `journey
+    title Presenter journey by persona
+    section Intake and triage
+      Review ICP-flagged studies: 4: Priya
+      Assign study to a BD rep: 5: Priya
+    section Selling
+      Review study and site roster: 4: Jordan
+      Work the KOL lead: 4: Jordan
+      Convert lead to opportunity: 5: Jordan
+      Advance the Sales Path: 3: Jordan
+      Quote via SharePoint: 3: Jordan
+    section Contracting
+      Upload the Award Letter: 4: Jordan
+      Send via Adobe Acrobat Sign: 5: Jordan
+      Close the opportunity won: 5: Jordan
+    section Delivery handoff
+      Complete onboarding items: 4: Sam
+      Push the project to Asana: 5: Sam
+      Handle the Change Order: 3: Sam`;
+
+const DIAGRAM_WORKFLOW = `flowchart TD
+    T[Triage] --> A[Awareness]
+    A --> N[Nurture]
+    N --> Q[Qualification]
+    Q --> R[Request]
+    R --> G1{CBO review complete?}
+    G1 -- No --> R
+    G1 -- Yes --> C[Consideration]
+    C --> G2{Award Letter uploaded?}
+    G2 -- No --> C
+    G2 -- Yes --> K[Contracting]
+    K --> G3{Contract signed?}
+    G3 -- No --> K
+    G3 -- Yes --> W[Closed Won]
+    W --> SE[Onboarding kickoff, Slack post, Asana handoff]
+    SE --> CO{Schedule Extension Notification?}
+    CO -- Yes --> COO[Change Order opportunity with abbreviated Path]
+    COO --> W2[Change Order Closed Won]
+    CO -- No --> D[Delivery]`;
+
+const DIAGRAM_CONTRACTING = `sequenceDiagram
+    participant BD as BD Rep
+    participant SF as Salesforce
+    participant AS as Adobe Acrobat Sign
+    participant SG as Sponsor signatory
+    BD->>SF: Upload and tag the Award Letter
+    Note over SF: Award Letter gates entry to Contracting
+    BD->>SF: Create the SOW contract record
+    BD->>AS: Send for signature
+    AS->>SG: Signature request
+    SG->>AS: Views and signs
+    AS-->>SF: Signed callback, contract status Signed
+    SF->>SF: Shield Field Audit Trail entry
+    SF-->>BD: Exit criterion met, Closed Won available`;
+
 const HIGHLIGHTS = [
     'Sales Path with Beacon handbook stages, entry/exit criteria, and three hard gates (CBO review, Award Letter, executed contract)',
     'On-demand lead conversion with a visible duplicate check and a blocking Close Date validation',
@@ -47,6 +138,22 @@ export default class DemoGuide extends LightningElement {
 
     get highlights() {
         return HIGHLIGHTS.map((text, i) => ({ id: `h${i}`, text }));
+    }
+
+    get integrationsDiagram() {
+        return DIAGRAM_INTEGRATIONS;
+    }
+
+    get journeyDiagram() {
+        return DIAGRAM_JOURNEY;
+    }
+
+    get workflowDiagram() {
+        return DIAGRAM_WORKFLOW;
+    }
+
+    get contractingDiagram() {
+        return DIAGRAM_CONTRACTING;
     }
 
     handleNodeClick(event) {

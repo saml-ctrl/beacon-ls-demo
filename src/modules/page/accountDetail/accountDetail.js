@@ -2,6 +2,7 @@ import { LightningElement, track } from 'lwc';
 import { subscribe, getCurrentRoute, navigate } from '../../../router';
 import {
     getAccount,
+    getChildAccounts,
     getContacts,
     getOpportunities,
     getStudy,
@@ -34,6 +35,19 @@ const OPP_COLUMNS = [
     { label: 'Close Date', fieldName: 'closeDate', type: 'date-local', initialWidth: 120 },
 ];
 
+const CHILD_COLUMNS = [
+    {
+        label: 'Account Name',
+        fieldName: 'name',
+        type: 'button',
+        wrapText: true,
+        typeAttributes: { label: { fieldName: 'name' }, variant: 'base', name: 'view' },
+    },
+    { label: 'Record Type', fieldName: 'recordType', initialWidth: 140 },
+    { label: 'City', fieldName: 'city', initialWidth: 140 },
+    { label: 'State', fieldName: 'state', initialWidth: 80 },
+];
+
 const ENGAGEMENT_COLUMNS = [
     {
         label: 'Opportunity',
@@ -50,12 +64,16 @@ export default class AccountDetail extends LightningElement {
     contactColumns = CONTACT_COLUMNS;
     oppColumns = OPP_COLUMNS;
     engagementColumns = ENGAGEMENT_COLUMNS;
+    childColumns = CHILD_COLUMNS;
 
     @track account = null;
     @track contacts = [];
     @track opportunities = [];
     @track engagements = [];
     @track study = null;
+    @track parentAccount = null;
+    @track childAccounts = [];
+    @track hierarchyItems = [];
 
     connectedCallback() {
         this._unsubRoute = subscribe(() => this.load());
@@ -86,6 +104,46 @@ export default class AccountDetail extends LightningElement {
                 return { ...s, oppName: opp ? opp.name : s.oppId };
             });
         this.study = account.studyId ? getStudy(account.studyId) : null;
+        this.parentAccount = account.parentAccountId ? getAccount(account.parentAccountId) : null;
+        this.childAccounts = getChildAccounts(account.id).map((c) => ({ ...c }));
+        this.hierarchyItems = this.buildHierarchy(account);
+    }
+
+    /**
+     * Account hierarchy tree for lightning-tree: the root is this account's
+     * parent (site network) if it has one, otherwise this account itself;
+     * children are the member accounts. Two levels — matches the demo model.
+     */
+    buildHierarchy(account) {
+        const root = account.parentAccountId ? getAccount(account.parentAccountId) : account;
+        if (!root) return [];
+        const children = getChildAccounts(root.id);
+        if (children.length === 0) return [];
+        const node = (a) => ({
+            label: a.name,
+            name: a.id,
+            metatext: a.id === account.id ? `${a.recordType} • this account` : `${a.recordType} • ${a.city}, ${a.state}`,
+            expanded: true,
+            items: [],
+        });
+        const rootNode = node(root);
+        rootNode.items = children.map(node);
+        return [rootNode];
+    }
+
+    get hasHierarchy() {
+        return this.hierarchyItems.length > 0;
+    }
+
+    get hasChildren() {
+        return this.childAccounts.length > 0;
+    }
+
+    handleHierarchySelect(event) {
+        const id = event.detail.name;
+        if (id && id !== this.account?.id) {
+            navigate(`/accounts/${id}`);
+        }
     }
 
     get hasAccount() {
@@ -109,9 +167,9 @@ export default class AccountDetail extends LightningElement {
         if (!a) return [];
         const fields = [
             { label: 'Record Type', value: a.recordType },
-            { label: 'City', value: a.city },
-            { label: 'State', value: a.state },
         ];
+        if (this.parentAccount) fields.push({ label: 'Parent Account', value: this.parentAccount.name });
+        fields.push({ label: 'City', value: a.city }, { label: 'State', value: a.state });
         if (a.phone) fields.push({ label: 'Phone', value: a.phone });
         if (a.website) fields.push({ label: 'Website', value: a.website });
         if (a.tier) fields.push({ label: 'Tier', value: a.tier });
@@ -125,6 +183,7 @@ export default class AccountDetail extends LightningElement {
         return [
             { label: 'Account Name', value: a.name, fullWidth: true },
             { label: 'Record Type', value: a.recordType },
+            { label: 'Parent Account', value: this.parentAccount ? this.parentAccount.name : '—' },
             { label: 'Tier', value: a.tier || '—' },
             { label: 'Phone', value: a.phone || '—', type: 'tel' },
             { label: 'Website', value: a.website || '—' },
@@ -136,6 +195,10 @@ export default class AccountDetail extends LightningElement {
 
     handleContactRowAction(event) {
         navigate(`/contacts/${event.detail.row.id}`);
+    }
+
+    handleChildRowAction(event) {
+        navigate(`/accounts/${event.detail.row.id}`);
     }
 
     handleOppRowAction(event) {

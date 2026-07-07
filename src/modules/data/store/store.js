@@ -148,21 +148,26 @@ function stamp(offsetDays, hour = 10, minute = 12) {
     return d.toISOString();
 }
 
+/**
+ * The 14 Clinical Site accounts for NRX-214-202. `network` is the parent
+ * Organization account (multi-site research network) in the account
+ * hierarchy; sites without a network are independent.
+ */
 const NEUROCESSA_SITES = [
-    { id: 'site-01', name: 'Lakeshore Neuroscience Institute', city: 'Chicago', state: 'IL', pi: 'Dr. Elena Vasquez', engaged: true },
-    { id: 'site-02', name: 'Meridian Behavioral Health Center', city: 'Atlanta', state: 'GA', pi: 'Dr. Rosa Idowu', engaged: true },
-    { id: 'site-03', name: 'Cascade Clinical Research', city: 'Portland', state: 'OR', pi: 'Dr. Alan Frey', engaged: true },
-    { id: 'site-04', name: 'Bluebonnet Psychiatry & Research', city: 'Austin', state: 'TX', pi: 'Dr. Camille Ortiz', engaged: true },
-    { id: 'site-05', name: 'Harborlight Clinical Trials', city: 'Boston', state: 'MA', pi: 'Dr. Priya Raman', engaged: true },
-    { id: 'site-06', name: 'Sonoran Neurobehavioral Institute', city: 'Phoenix', state: 'AZ', pi: 'Dr. Theo Marsh', engaged: true },
-    { id: 'site-07', name: 'Great Plains Research Partners', city: 'Omaha', state: 'NE', pi: 'Dr. Lena Kowalski', engaged: false },
-    { id: 'site-08', name: 'Alleghany Mind Health Research', city: 'Pittsburgh', state: 'PA', pi: 'Dr. Marcus Bell', engaged: false },
-    { id: 'site-09', name: 'Pacific Crest Neuropsychiatry', city: 'San Diego', state: 'CA', pi: 'Dr. Sofia Ferreira', engaged: true },
-    { id: 'site-10', name: 'Twin Pines Clinical Studies', city: 'Minneapolis', state: 'MN', pi: 'Dr. Owen Tran', engaged: false },
-    { id: 'site-11', name: 'Riverstone Research Group', city: 'Nashville', state: 'TN', pi: 'Dr. Gabrielle Lyon-Smith', engaged: true },
-    { id: 'site-12', name: 'Foxglove Behavioral Research', city: 'Durham', state: 'NC', pi: 'Dr. Henry Adjei', engaged: false },
-    { id: 'site-13', name: 'Summit Line Neuroscience', city: 'Denver', state: 'CO', pi: 'Dr. Isabel Munro', engaged: true },
-    { id: 'site-14', name: 'Gulf Coast Clinical Institute', city: 'Tampa', state: 'FL', pi: 'Dr. Viktor Halasz', engaged: false },
+    { id: 'site-01', name: 'Lakeshore Neuroscience Institute', city: 'Chicago', state: 'IL', pi: 'Dr. Elena Vasquez', engaged: true, network: 'net-lakeshore' },
+    { id: 'site-02', name: 'Meridian Behavioral Health Center', city: 'Atlanta', state: 'GA', pi: 'Dr. Rosa Idowu', engaged: true, network: 'net-meridian' },
+    { id: 'site-03', name: 'Cascade Clinical Research', city: 'Portland', state: 'OR', pi: 'Dr. Alan Frey', engaged: true, network: 'net-pacific' },
+    { id: 'site-04', name: 'Bluebonnet Psychiatry & Research', city: 'Austin', state: 'TX', pi: 'Dr. Camille Ortiz', engaged: true, network: '' },
+    { id: 'site-05', name: 'Harborlight Clinical Trials', city: 'Boston', state: 'MA', pi: 'Dr. Priya Raman', engaged: true, network: '' },
+    { id: 'site-06', name: 'Sonoran Neurobehavioral Institute', city: 'Phoenix', state: 'AZ', pi: 'Dr. Theo Marsh', engaged: true, network: 'net-pacific' },
+    { id: 'site-07', name: 'Great Plains Research Partners', city: 'Omaha', state: 'NE', pi: 'Dr. Lena Kowalski', engaged: false, network: 'net-lakeshore' },
+    { id: 'site-08', name: 'Alleghany Mind Health Research', city: 'Pittsburgh', state: 'PA', pi: 'Dr. Marcus Bell', engaged: false, network: '' },
+    { id: 'site-09', name: 'Pacific Crest Neuropsychiatry', city: 'San Diego', state: 'CA', pi: 'Dr. Sofia Ferreira', engaged: true, network: 'net-pacific' },
+    { id: 'site-10', name: 'Twin Pines Clinical Studies', city: 'Minneapolis', state: 'MN', pi: 'Dr. Owen Tran', engaged: false, network: 'net-lakeshore' },
+    { id: 'site-11', name: 'Riverstone Research Group', city: 'Nashville', state: 'TN', pi: 'Dr. Gabrielle Lyon-Smith', engaged: true, network: 'net-meridian' },
+    { id: 'site-12', name: 'Foxglove Behavioral Research', city: 'Durham', state: 'NC', pi: 'Dr. Henry Adjei', engaged: false, network: 'net-meridian' },
+    { id: 'site-13', name: 'Summit Line Neuroscience', city: 'Denver', state: 'CO', pi: 'Dr. Isabel Munro', engaged: true, network: 'net-pacific' },
+    { id: 'site-14', name: 'Gulf Coast Clinical Institute', city: 'Tampa', state: 'FL', pi: 'Dr. Viktor Halasz', engaged: false, network: 'net-meridian' },
 ];
 
 function buildSeed() {
@@ -300,12 +305,21 @@ function buildSeed() {
             },
         ],
 
-        /** Sponsor orgs + clinical sites. Record types: Organization | Clinical Site. */
+        /**
+         * Sponsor orgs, site-network orgs, and clinical sites.
+         * Record types: Organization | Clinical Site.
+         * Account hierarchy: Clinical Sites roll up to their site-network
+         * Organization via parentAccountId (blank = independent site).
+         */
         accounts: [
+            { id: 'net-lakeshore', name: 'Lakeshore Health Network', recordType: 'Organization', organizationType: 'Site Network', city: 'Chicago', state: 'IL', phone: '(312) 555-0140', website: 'lakeshorehealth.example', tier: '', description: 'Multi-site clinical research network across the Midwest. 3 member sites participating in NRX-214-202.', studyId: '', parentAccountId: '' },
+            { id: 'net-meridian', name: 'Meridian Care Alliance', recordType: 'Organization', organizationType: 'Site Network', city: 'Atlanta', state: 'GA', phone: '(404) 555-0122', website: 'meridiancare.example', tier: '', description: 'Southeastern behavioral-health site network. 4 member sites participating in NRX-214-202.', studyId: '', parentAccountId: '' },
+            { id: 'net-pacific', name: 'Pacific Crest Research Partners', recordType: 'Organization', organizationType: 'Site Network', city: 'San Diego', state: 'CA', phone: '(619) 555-0168', website: 'pacificcrestresearch.example', tier: '', description: 'Western clinical research network. 4 member sites participating in NRX-214-202.', studyId: '', parentAccountId: '' },
             ...NEUROCESSA_SITES.map((s) => ({
                 id: s.id,
                 name: s.name,
                 recordType: 'Clinical Site',
+                organizationType: '',
                 city: s.city,
                 state: s.state,
                 phone: '',
@@ -313,6 +327,7 @@ function buildSeed() {
                 tier: '',
                 description: `Clinical site for NRX-214-202 (${s.city}, ${s.state}). Auto-created from the ingestion payload.`,
                 studyId: IDS.study,
+                parentAccountId: s.network,
             })),
             { id: 'acct-cortivance', name: 'Cortivance Therapeutics', recordType: 'Organization', city: 'Cambridge', state: 'MA', phone: '(617) 555-0110', website: 'cortivance.example', tier: 'Tier 2', description: 'Mid-cap biotech. Alzheimer’s portfolio.', studyId: '' },
             { id: 'acct-synaptiq', name: 'Synaptiq Biosciences', recordType: 'Organization', city: 'South San Francisco', state: 'CA', phone: '(650) 555-0139', website: 'synaptiq.example', tier: 'Tier 1', description: 'Late-stage CNS specialist. Parkinson’s Phase 3 program.', studyId: '' },
@@ -603,6 +618,8 @@ export function getStudy(id) { return state.researchStudies.find((s) => s.id ===
 export function getTriageQueue() { return state.researchStudies.filter((s) => s.status === 'Unassigned'); }
 export function getAccounts() { return state.accounts; }
 export function getAccount(id) { return state.accounts.find((a) => a.id === id) || null; }
+/** Child accounts in the account hierarchy (e.g. a site network's member Clinical Sites). */
+export function getChildAccounts(accountId) { return state.accounts.filter((a) => a.parentAccountId === accountId); }
 export function getLeads() { return state.leads; }
 export function getLead(id) { return state.leads.find((l) => l.id === id) || null; }
 export function getContacts() { return state.contacts; }

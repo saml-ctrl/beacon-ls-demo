@@ -23,6 +23,23 @@
                                 <ui-detail-grid fields={detailFields}></ui-detail-grid>
                             </div>
                         </lightning-card>
+                        <template lwc:if={hasHierarchy}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Account Hierarchy" icon-name="standard:hierarchy">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <lightning-tree
+                                            items={hierarchyItems}
+                                            header="Site network roll-up"
+                                            onselect={handleHierarchySelect}>
+                                        </lightning-tree>
+                                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                            Clinical Site accounts roll up to their site-network Organization
+                                            via Parent Account. Select any account to open it.
+                                        </p>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
                         <template lwc:if={study}>
                             <div class="slds-m-top_small">
                                 <lightning-card title="Research Study" icon-name="standard:study">
@@ -38,6 +55,18 @@
                         </template>
                     </lightning-tab>
                     <lightning-tab label="Related" value="related">
+                        <template lwc:if={hasChildren}>
+                            <div class="slds-m-bottom_small">
+                                <ui-related-list
+                                    title="Child Accounts"
+                                    icon-name="standard:hierarchy"
+                                    columns={childColumns}
+                                    rows={childAccounts}
+                                    empty-message="No child accounts."
+                                    onrowaction={handleChildRowAction}>
+                                </ui-related-list>
+                            </div>
+                        </template>
                         <template lwc:if={isOrganization}>
                             <ui-related-list
                                 title="Contacts"

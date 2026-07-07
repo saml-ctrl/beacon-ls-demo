@@ -39,6 +39,31 @@
             </lightning-card>
         </div>
 
+        <div class="slds-m-top_medium">
+            <lightning-card icon-name="standard:flow" title="Architecture &amp; Flow Diagrams">
+                <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">
+                        The same story in four pictures — how data flows between systems, who does what,
+                        how the Sales Path gates enforce process, and the contracting handshake.
+                    </p>
+                    <lightning-tabset active-tab-value="integrations">
+                        <lightning-tab label="Integration Data Flow" value="integrations">
+                            <ui-mermaid-diagram code={integrationsDiagram}></ui-mermaid-diagram>
+                        </lightning-tab>
+                        <lightning-tab label="User Journey" value="journey">
+                            <ui-mermaid-diagram code={journeyDiagram}></ui-mermaid-diagram>
+                        </lightning-tab>
+                        <lightning-tab label="Core Sales Workflow" value="workflow">
+                            <ui-mermaid-diagram code={workflowDiagram}></ui-mermaid-diagram>
+                        </lightning-tab>
+                        <lightning-tab label="Contracting Sequence" value="contracting">
+                            <ui-mermaid-diagram code={contractingDiagram}></ui-mermaid-diagram>
+                        </lightning-tab>
+                    </lightning-tabset>
+                </div>
+            </lightning-card>
+        </div>
+
         <div class="slds-m-top_medium slds-m-bottom_medium">
             <lightning-card icon-name="utility:check" title="What this wireframe demonstrates">
                 <div class="slds-p-horizontal_medium slds-p-bottom_small">

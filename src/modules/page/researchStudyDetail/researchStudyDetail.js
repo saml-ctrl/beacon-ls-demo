@@ -10,6 +10,7 @@ const SITE_COLUMNS = [
         typeAttributes: { label: { fieldName: 'name' }, variant: 'base', name: 'view' },
     },
     { label: 'Account Record Type', fieldName: 'recordType', initialWidth: 160 },
+    { label: 'Site Network', fieldName: 'parentName', initialWidth: 200 },
     { label: 'City', fieldName: 'city', initialWidth: 130 },
     { label: 'State', fieldName: 'state', initialWidth: 80 },
 ];
@@ -50,7 +51,15 @@ export default class ResearchStudyDetail extends LightningElement {
         const id = getCurrentRoute()?.params?.id;
         const study = id ? getStudy(id) : null;
         this.study = study ? { ...study } : null;
-        this.sites = study ? study.siteIds.map((sid) => getAccount(sid)).filter(Boolean).map((a) => ({ ...a })) : [];
+        this.sites = study
+            ? study.siteIds
+                  .map((sid) => getAccount(sid))
+                  .filter(Boolean)
+                  .map((a) => ({
+                      ...a,
+                      parentName: a.parentAccountId ? getAccount(a.parentAccountId)?.name || '' : '',
+                  }))
+            : [];
         this.leads = study ? study.leadIds.map((lid) => getLead(lid)).filter(Boolean).map((l) => ({ ...l })) : [];
         this.opportunity = study && study.opportunityId ? getOpportunity(study.opportunityId) : null;
     }
