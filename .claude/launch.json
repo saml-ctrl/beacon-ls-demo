@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "beacon-ls-demo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "C:\\Users\\samfl\\VibeWireframe\\beacon-ls-demo",
+      "port": 3000
+    }
+  ]
+}
