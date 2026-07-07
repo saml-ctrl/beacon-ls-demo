@@ -1,0 +1,9 @@
+.c-contract-signed {
+    display: flex;
+    align-items: center;
+    background: var(--slds-g-color-success-container-1, #cdefc4);
+    color: var(--slds-g-color-on-success-1, #2e844a);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+}

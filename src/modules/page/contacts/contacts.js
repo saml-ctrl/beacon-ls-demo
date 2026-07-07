@@ -1,6 +1,6 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, track } from 'lwc';
 import { navigate } from '../../../router';
-import { getAllContacts } from 'data/contacts';
+import { getContacts, subscribeStore } from 'data/store';
 
 const COLUMNS = [
     {
@@ -8,61 +8,78 @@ const COLUMNS = [
         fieldName: 'name',
         type: 'button',
         sortable: true,
-        typeAttributes: {
-            label: { fieldName: 'name' },
-            variant: 'base',
-            name: 'view'
-        }
+        typeAttributes: { label: { fieldName: 'name' }, variant: 'base', name: 'view' },
     },
-    { label: 'Account Name', fieldName: 'company', sortable: true },
-    { label: 'Title', fieldName: 'title', sortable: true },
-    { label: 'Phone', fieldName: 'phone', type: 'phone' },
+    { label: 'Title', fieldName: 'title' },
+    { label: 'Account', fieldName: 'accountName', sortable: true },
+    { label: 'Role', fieldName: 'role', initialWidth: 180 },
     { label: 'Email', fieldName: 'email', type: 'email' },
+    { label: 'Phone', fieldName: 'phone', type: 'phone', initialWidth: 140 },
+    { label: 'Enriched', fieldName: 'enriched', type: 'boolean', initialWidth: 100 },
     {
         type: 'action',
-        typeAttributes: {
-            rowActions: [
-                { label: 'View', name: 'view' },
-                { label: 'Edit', name: 'edit' },
-                { label: 'Delete', name: 'delete' }
-            ]
-        }
-    }
+        typeAttributes: { rowActions: [{ label: 'View', name: 'view' }] },
+    },
+];
+
+const LIST_VIEWS = [
+    { value: 'all', label: 'All Contacts', filter: () => true },
+    { value: 'kol', label: 'KOL Contacts', filter: (c) => c.role === 'KOL Contact' },
+    { value: 'pi', label: 'Principal Investigators (PIs)', filter: (c) => c.role === 'Principal Investigator' },
+    { value: 'enriched', label: 'Enriched via Clay', filter: (c) => !!c.enriched },
 ];
 
 export default class Contacts extends LightningElement {
     columns = COLUMNS;
-    data = [];
+    listViews = LIST_VIEWS.map(({ value, label }) => ({ value, label }));
+    @track rows = [];
+    @track activeView = 'all';
+    searchTerm = '';
     sortedBy = 'name';
     sortedDirection = 'asc';
-    searchTerm = '';
 
     connectedCallback() {
-        this.data = getAllContacts();
+        this._unsubscribe = subscribeStore(() => this.refresh());
+        this.refresh();
     }
 
-    get filteredData() {
-        if (!this.searchTerm) {
-            return this.data;
+    disconnectedCallback() {
+        this._unsubscribe?.();
+    }
+
+    refresh() {
+        this.rows = getContacts().map((c) => ({ ...c }));
+    }
+
+    get activeViewDef() {
+        return LIST_VIEWS.find((v) => v.value === this.activeView) || LIST_VIEWS[0];
+    }
+
+    get activeViewLabel() {
+        return this.activeViewDef.label;
+    }
+
+    get filteredRows() {
+        let rows = this.rows.filter(this.activeViewDef.filter);
+        if (this.searchTerm) {
+            const term = this.searchTerm.toLowerCase();
+            rows = rows.filter(
+                (c) =>
+                    c.name.toLowerCase().includes(term) ||
+                    (c.accountName || '').toLowerCase().includes(term) ||
+                    (c.title || '').toLowerCase().includes(term)
+            );
         }
-        const term = this.searchTerm.toLowerCase();
-        return this.data.filter(contact =>
-            contact.name.toLowerCase().includes(term) ||
-            contact.company.toLowerCase().includes(term) ||
-            contact.title.toLowerCase().includes(term) ||
-            contact.email.toLowerCase().includes(term)
-        );
+        return rows;
     }
 
     get metaText() {
-        const count = this.filteredData.length;
-        const sortField = this.columns.find(c => c.fieldName === this.sortedBy)?.label;
-        let text = `${count} item${count !== 1 ? 's' : ''}`;
-        if (sortField) {
-            text += ` \u2022 Sorted by ${sortField}`;
-        }
-        text += ' \u2022 Updated a few seconds ago';
-        return text;
+        const n = this.filteredRows.length;
+        return `${n} item${n === 1 ? '' : 's'} • Sorted by Name • Filtered by ${this.activeViewDef.label} • Updated a few seconds ago`;
+    }
+
+    handleViewChange(event) {
+        this.activeView = event.detail.value;
     }
 
     handleSearch(event) {
@@ -71,36 +88,20 @@ export default class Contacts extends LightningElement {
 
     handleSort(event) {
         const { fieldName, sortDirection } = event.detail;
-        const clonedData = [...this.data];
-        const sortKey = fieldName;
-
-        clonedData.sort((a, b) => {
-            let aVal = a[sortKey] || '';
-            let bVal = b[sortKey] || '';
-
-            if (typeof aVal === 'string') {
-                aVal = aVal.toLowerCase();
-                bVal = bVal.toLowerCase();
-            }
-
-            if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        this.data = clonedData;
         this.sortedBy = fieldName;
         this.sortedDirection = sortDirection;
+        const rows = [...this.rows];
+        rows.sort((a, b) => {
+            const av = (a[fieldName] ?? '').toString().toLowerCase();
+            const bv = (b[fieldName] ?? '').toString().toLowerCase();
+            if (av < bv) return sortDirection === 'asc' ? -1 : 1;
+            if (av > bv) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+        this.rows = rows;
     }
 
     handleRowAction(event) {
-        const action = event.detail.action;
-        const row = event.detail.row;
-
-        if (action.name === 'view') {
-            navigate(`/contacts/${row.id}`);
-        } else if (action.name === 'delete') {
-            this.data = this.data.filter(item => item.id !== row.id);
-        }
+        navigate(`/contacts/${event.detail.row.id}`);
     }
 }

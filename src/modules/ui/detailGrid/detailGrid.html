@@ -1,0 +1,17 @@
+<template>
+    <div class="slds-grid slds-wrap slds-gutters">
+        <template for:each={normalized} for:item="f">
+            <div key={f.key} class={f.colClass}>
+                <template lwc:if={f.isTextarea}>
+                    <lightning-textarea label={f.label} value={f.value} read-only></lightning-textarea>
+                </template>
+                <template lwc:elseif={f.isCheckbox}>
+                    <lightning-input type="checkbox" label={f.label} checked={f.checked} disabled></lightning-input>
+                </template>
+                <template lwc:else>
+                    <lightning-input type={f.type} label={f.label} value={f.value} read-only></lightning-input>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

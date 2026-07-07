@@ -20,7 +20,7 @@ lightning-card {
 }
 
 .theme-switcher-card {
-    box-shadow: var(--slds-g-shadow-4);
+    box-shadow: var(--slds-g-shadow-4, 0px 2px 5px 0px #00000027);
 }
 
 @media (prefers-reduced-motion: no-preference) {

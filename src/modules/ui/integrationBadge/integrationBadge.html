@@ -1,0 +1,14 @@
+<template>
+    <template lwc:if={visible}>
+        <div class="c-integration-badge slds-grid slds-grid_vertical-align-center slds-m-vertical_x-small">
+            <lightning-icon icon-name="utility:connected_apps" size="x-small" alternative-text="Integration"></lightning-icon>
+            <div class="slds-m-left_x-small">
+                <span class="c-integration-badge__label">{label}</span>
+                <lightning-badge class="slds-m-left_x-small" label={directionLabel}></lightning-badge>
+                <template lwc:if={note}>
+                    <p class="c-integration-badge__note">{note}</p>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>

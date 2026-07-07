@@ -1,0 +1,21 @@
+<template>
+    <template lwc:if={visible}>
+        <div class="c-open-decision slds-m-vertical_x-small">
+            <button
+                type="button"
+                class="c-open-decision__chip"
+                aria-expanded={expandedString}
+                onclick={handleToggle}>
+                <lightning-icon icon-name="utility:warning" size="xx-small" alternative-text="Open decision"></lightning-icon>
+                <span class="c-open-decision__label slds-m-horizontal_xx-small">Open Decision: {title}</span>
+                <lightning-icon icon-name={chevronIcon} size="xx-small" alternative-text="Toggle detail"></lightning-icon>
+            </button>
+            <template lwc:if={expanded}>
+                <div class="c-open-decision__body slds-text-body_small">
+                    {body}
+                    <slot></slot>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

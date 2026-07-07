@@ -1,0 +1,19 @@
+<template>
+    <lightning-button-menu
+        icon-name="utility:down"
+        variant="bare"
+        icon-size="small"
+        alternative-text="Select a list view"
+        title="Select a list view"
+        menu-alignment="left"
+        onselect={handleSelect}>
+        <template for:each={items} for:item="view">
+            <lightning-menu-item
+                key={view.value}
+                label={view.label}
+                value={view.value}
+                checked={view.checked}>
+            </lightning-menu-item>
+        </template>
+    </lightning-button-menu>
+</template>

@@ -1,0 +1,88 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasStudy}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:study"
+                object-label="Research Study"
+                title={study.name}
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <template lwc:if={isUnassigned}>
+                            <lightning-button label="Approve &amp; Assign (Intake Triage)" variant="brand" onclick={handleGoToIntake}></lightning-button>
+                        </template>
+                        <template lwc:if={opportunity}>
+                            <lightning-button label="View Opportunity" variant="brand" onclick={handleGoToOpportunity}></lightning-button>
+                        </template>
+                        <lightning-button label="Edit" variant="neutral"></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <ui-open-decision
+                title="Research Study object model"
+                body="Standard Life Sciences Cloud object vs. custom object — explicitly undecided. Confirm during design discovery.">
+            </ui-open-decision>
+
+            <ui-integration-badge
+                label="Citeline + ClinicalTrials.gov → MuleSoft → Salesforce"
+                direction="inbound"
+                note="The related records were auto-created from the ingestion payload (daily batch, dedupe on Citeline trial ID).">
+            </ui-integration-badge>
+
+            <div class="slds-m-top_small">
+                <lightning-tabset active-tab-value="details">
+                    <lightning-tab label="Details" value="details">
+                        <lightning-card title="Research Study Details" icon-name="standard:study">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                <ui-detail-grid fields={detailFields}></ui-detail-grid>
+                            </div>
+                        </lightning-card>
+                        <template lwc:if={opportunity}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Opportunity" icon-name="standard:opportunity">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <lightning-button variant="base" label={opportunity.name} onclick={handleGoToOpportunity}></lightning-button>
+                                        <p class="slds-text-body_small slds-text-color_weak">{opportunityMeta}</p>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </lightning-tab>
+                    <lightning-tab label="Related" value="related">
+                        <ui-related-list
+                            title="Clinical Sites"
+                            icon-name="standard:location"
+                            columns={siteColumns}
+                            rows={sites}
+                            empty-message="No Clinical Sites in the ingestion payload for this study."
+                            onrowaction={handleSiteRowAction}>
+                        </ui-related-list>
+                        <div class="slds-m-top_small">
+                            <ui-related-list
+                                title="PI / KOL Leads"
+                                icon-name="standard:lead"
+                                columns={leadColumns}
+                                rows={leads}
+                                empty-message="No PI / KOL records landed as Leads for this study."
+                                onrowaction={handleLeadRowAction}>
+                            </ui-related-list>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                PI / KOL records land as Leads tied to the study from the ingestion payload.
+                            </p>
+                        </div>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Research Study not found</p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Research Studies" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

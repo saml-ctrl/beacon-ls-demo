@@ -9,19 +9,43 @@ import {
     DEFAULT_APP_ID,
 } from '../../../apps.config';
 import { toggleSLDS, activeSLDSVersion, STORAGE_KEY_SLDS_VERSION } from '../../../build/slds-loader';
-import Home from 'page/home';
-import IconTest from 'page/iconTest';
+import DemoGuide from 'page/demoGuide';
+import Intake from 'page/intake';
+import ResearchStudies from 'page/researchStudies';
+import ResearchStudyDetail from 'page/researchStudyDetail';
+import Leads from 'page/leads';
+import LeadDetail from 'page/leadDetail';
+import Opportunities from 'page/opportunities';
+import OpportunityDetail from 'page/opportunityDetail';
+import Onboarding from 'page/onboarding';
+import Handoff from 'page/handoff';
+import ContractDetail from 'page/contractDetail';
+import Accounts from 'page/accounts';
+import AccountDetail from 'page/accountDetail';
 import Contacts from 'page/contacts';
 import ContactDetail from 'page/contactDetail';
+import Dashboards from 'page/dashboards';
 import Builder from 'page/builder';
 import NotFound from 'page/notFound';
 
 /** Option A: explicit registration – add one import + one entry here when adding a route */
 const ROUTE_COMPONENTS = {
-    'page-home': Home,
-    'page-icon-test': IconTest,
+    'page-demo-guide': DemoGuide,
+    'page-intake': Intake,
+    'page-research-studies': ResearchStudies,
+    'page-research-study-detail': ResearchStudyDetail,
+    'page-leads': Leads,
+    'page-lead-detail': LeadDetail,
+    'page-opportunities': Opportunities,
+    'page-opportunity-detail': OpportunityDetail,
+    'page-onboarding': Onboarding,
+    'page-handoff': Handoff,
+    'page-contract-detail': ContractDetail,
+    'page-accounts': Accounts,
+    'page-account-detail': AccountDetail,
     'page-contacts': Contacts,
     'page-contact-detail': ContactDetail,
+    'page-dashboards': Dashboards,
     'page-builder': Builder,
 };
 

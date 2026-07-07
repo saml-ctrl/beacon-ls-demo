@@ -1,0 +1,20 @@
+<template>
+    <lightning-card icon-name={iconName} title={heading}>
+        <template lwc:if={actionLabel}>
+            <lightning-button slot="actions" label={actionLabel} onclick={handleHeaderAction}></lightning-button>
+        </template>
+        <template lwc:if={hasRows}>
+            <lightning-datatable
+                key-field={keyField}
+                data={rows}
+                columns={columns}
+                hide-checkbox-column
+                onrowaction={handleRowAction}>
+            </lightning-datatable>
+        </template>
+        <template lwc:else>
+            <p class="slds-p-horizontal_medium slds-p-bottom_small slds-text-color_weak">{emptyMessage}</p>
+        </template>
+        <slot></slot>
+    </lightning-card>
+</template>

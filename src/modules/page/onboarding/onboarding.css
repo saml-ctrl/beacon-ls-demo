@@ -1,0 +1,27 @@
+.c-onboarding-sequence {
+    display: flex;
+    align-items: center;
+    background: var(--slds-g-color-surface-container-1, #fafafa);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-onboarding-warning {
+    display: flex;
+    align-items: center;
+    background: var(--slds-g-color-warning-container-1, #f9e3b6);
+    color: var(--slds-g-color-on-warning-1, #8c4b02);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.c-onboarding-success {
+    display: flex;
+    align-items: center;
+    background: var(--slds-g-color-success-container-1, #cdefc4);
+    color: var(--slds-g-color-on-success-1, #2e844a);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}

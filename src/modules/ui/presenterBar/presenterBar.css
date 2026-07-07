@@ -1,0 +1,56 @@
+.c-presenter-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 9000;
+    /* Docked utility bar look */
+    background: var(--slds-g-color-surface-container-2, #f3f3f3);
+    border-top: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    box-shadow: var(--slds-g-shadow-2, 0 -2px 3px rgba(0, 0, 0, 0.1));
+    height: var(--slds-g-sizing-10, 3rem);
+}
+
+.c-presenter-bar__inner {
+    height: 100%;
+}
+
+.c-presenter-bar__meta {
+    /* keep the step label readable but never dominant */
+    max-width: 24rem;
+}
+
+.c-presenter-bar__step-label {
+    color: var(--slds-g-color-on-surface-2, #444);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    max-width: 14rem;
+}
+
+.c-presenter-bar__chips {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    align-items: center;
+}
+
+.c-presenter-bar__chip {
+    width: var(--slds-g-sizing-8, 1.75rem);
+    height: var(--slds-g-sizing-8, 1.75rem);
+    border-radius: var(--slds-g-radius-border-circle, 50%);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    background: var(--slds-g-color-surface-1, #fff);
+    color: var(--slds-g-color-on-surface-2, #444);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    line-height: var(--slds-g-font-line-height-1, 1);
+    cursor: pointer;
+}
+
+.c-presenter-bar__chip:hover {
+    background: var(--slds-g-color-surface-container-3, #e5e5e5);
+}
+
+.c-presenter-bar__chip_current,
+.c-presenter-bar__chip_current:hover {
+    background: var(--slds-g-color-accent-1, #0176d3);
+    border-color: var(--slds-g-color-accent-1, #0176d3);
+    color: var(--slds-g-color-on-accent-1, #fff);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}

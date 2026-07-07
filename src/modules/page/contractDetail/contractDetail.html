@@ -1,0 +1,124 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasContract}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:contract"
+                object-label="Contract"
+                title={contract.name}
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button label="Open Opportunity" onclick={handleGoToOpportunity}></lightning-button>
+                        <lightning-button label="Edit" variant="neutral"></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                <!-- Prominent Details section -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
+                    <lightning-card title="Contract Details" icon-name="standard:contract">
+                        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                            <ui-detail-grid fields={detailFields}></ui-detail-grid>
+                        </div>
+                    </lightning-card>
+                </div>
+
+                <!-- E-Signature panel (interaction, not a related list — stays prominent) -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
+                    <lightning-card title="E-Signature — Adobe Acrobat Sign (managed package)" icon-name="utility:signature">
+                        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                            <div class="slds-m-bottom_small">
+                                <lightning-badge label={contract.status}></lightning-badge>
+                            </div>
+
+                            <lightning-progress-indicator type="base" current-step={currentSignStep}>
+                                <template for:each={signSteps} for:item="step">
+                                    <lightning-progress-step key={step.value} label={step.label} value={step.value}></lightning-progress-step>
+                                </template>
+                            </lightning-progress-indicator>
+
+                            <div class="slds-m-top_medium">
+                                <template lwc:if={isDraft}>
+                                    <lightning-button label="Upload document" variant="brand" icon-name="utility:upload" onclick={handleUpload}></lightning-button>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                        Redlining is handled offline before upload.
+                                    </p>
+                                </template>
+                                <template lwc:elseif={isUploaded}>
+                                    <lightning-button label="Tag signature fields" variant="brand" icon-name="utility:signature" onclick={handleTag}></lightning-button>
+                                </template>
+                                <template lwc:elseif={isTagged}>
+                                    <lightning-button label="Send for signature" variant="brand" icon-name="utility:email" onclick={handleSend}></lightning-button>
+                                </template>
+                                <template lwc:elseif={showSponsorAction}>
+                                    <lightning-button label={sponsorActionLabel} variant="brand" icon-name="utility:touch_action" onclick={handleSponsorAction}></lightning-button>
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                        Presenter control — status advances Sent → Viewed → Signed via the standard managed-package callback.
+                                    </p>
+                                </template>
+                                <template lwc:elseif={isSigned}>
+                                    <div class="c-contract-signed" role="status">
+                                        <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Signed"></lightning-icon>
+                                        <span class="slds-m-left_x-small">
+                                            Contract executed — executed PDF filed; Opportunity contract status updated.
+                                        </span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </lightning-card>
+                    <div class="slds-m-top_small">
+                        <ui-integration-badge
+                            label="Adobe Acrobat Sign (managed package) ↔ Salesforce"
+                            direction="sync"
+                            note="Standard Adobe Acrobat Sign managed package only; customer provides licensing. Customer responsible for licensing and API tokens.">
+                        </ui-integration-badge>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-m-top_small">
+                <lightning-tabset active-tab-value="files">
+                    <lightning-tab label="Files" value="files">
+                        <ui-related-list
+                            title="Files"
+                            icon-name="standard:file"
+                            columns={fileColumns}
+                            rows={files}
+                            empty-message="No files yet — the final document is attached at upload; the executed PDF is filed on signature.">
+                        </ui-related-list>
+                    </lightning-tab>
+                    <lightning-tab label="Field Audit Trail" value="audit">
+                        <ui-audit-trail contract-id={contract.id}></ui-audit-trail>
+                        <div class="slds-m-top_x-small">
+                            <ui-open-decision
+                                title="Part 11 e-signature / audit scope"
+                                body="Phase 1 scope vs. informational only — Beacon may not yet be required to be Part 11 compliant. Decide in discovery.">
+                            </ui-open-decision>
+                            <ui-open-decision
+                                title="Document storage system of record"
+                                body="SharePoint today vs. Salesforce Files — to be decided in discovery.">
+                            </ui-open-decision>
+                        </div>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Contract not found</p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                    The journey SOW contract is created during Lead Conversion (journey step 4).
+                </p>
+                <div class="slds-m-top_small">
+                    <lightning-button-group>
+                        <lightning-button label="Go to Leads" onclick={handleGoToLeads}></lightning-button>
+                        <lightning-button label="Go to Opportunities" variant="brand" onclick={handleGoToOpportunities}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

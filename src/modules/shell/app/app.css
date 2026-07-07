@@ -55,6 +55,8 @@
     min-width: 0;
     overflow: auto;
     position: relative;
+    /* Keep scrolled content clear of the docked presenter bar */
+    padding-bottom: var(--slds-g-spacing-9, 3.5rem);
 }
 
 .slds-section {

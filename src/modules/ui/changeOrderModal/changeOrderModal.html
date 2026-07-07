@@ -1,0 +1,35 @@
+<template>
+    <lightning-modal-header label="Log Schedule Extension Notification"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-p-around_x-small">
+            <p class="slds-m-bottom_small">
+                The project schedule is extending <strong>45 days</strong> beyond the Estimated Schedule —
+                beyond the <strong>30-day</strong> Change Order trigger. Per the SOW, the parties execute a
+                Change Order to extend time-based fees.
+            </p>
+            <p class="slds-text-title_caps slds-m-bottom_x-small">Confirming will create</p>
+            <ul class="slds-list_dotted slds-m-bottom_small">
+                <li>A <strong>Change Order</strong> opportunity (Change Order record type) with its own
+                    abbreviated Path: Identified → Scoped → Contracting → Closed Won</li>
+                <li>Linked to the parent opportunity and <strong>Exhibit A</strong></li>
+                <li>Pre-populated with time-based line items only:
+                    Clinical Operations Support extension (site-month) and
+                    Scientific PM (monthly retainer) extension</li>
+                <li>A draft <strong>Change Order</strong> contract for the abbreviated e-signature flow</li>
+            </ul>
+            <ui-open-decision
+                title="Change Order sales process"
+                body="The Change Order stage set (Identified → Scoped → Contracting → Closed Won) is a proposed default — confirm in discovery.">
+            </ui-open-decision>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+        <lightning-button
+            class="slds-m-left_x-small"
+            label="Create Change Order"
+            variant="brand"
+            onclick={handleConfirm}>
+        </lightning-button>
+    </lightning-modal-footer>
+</template>

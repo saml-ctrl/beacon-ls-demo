@@ -10,6 +10,20 @@
         </lightning-layout-item>
         <lightning-layout-item class="slds-global-header__item">
             <lightning-layout vertical-align="center">
+                <lightning-layout-item class="slds-m-right_small">
+                    <div class="slds-grid slds-grid_vertical-align-center c-discovery-toggle" title="Show or hide integration badges and Open Decision flags">
+                        <lightning-input
+                            type="toggle"
+                            label="Discovery Mode"
+                            variant="label-hidden"
+                            checked={discoveryOn}
+                            message-toggle-active=""
+                            message-toggle-inactive=""
+                            onchange={handleDiscoveryToggle}>
+                        </lightning-input>
+                        <span class="slds-m-left_xx-small slds-text-body_small c-discovery-toggle__label">Discovery Mode</span>
+                    </div>
+                </lightning-layout-item>
                 <lightning-layout-item>
                     <lightning-button-icon icon-name="utility:agent_astro" aria-haspopup="true" title="Agentforce"
                         variant="bare" size="large" onclick={handleAgentforceClick} class="lightning-button-icon_custom slds-m-right_small">

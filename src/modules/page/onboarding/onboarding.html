@@ -1,0 +1,172 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasOpp}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:form"
+                object-label="Onboarding"
+                title="Onboarding Kickoff"
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button label="Open Opportunity" onclick={handleGoToOpp}></lightning-button>
+                        <lightning-button label="ClinOps Handoff (Asana)" onclick={handleGoToHandoff}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <template lwc:if={locked}>
+                <div class="slds-p-around_large slds-text-align_center">
+                    <p class="slds-text-heading_small">Onboarding Kickoff unlocks when this Opportunity is Closed Won.</p>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                        Sign the contract (journey step 7), then move the Path to Closed Won.
+                    </p>
+                    <div class="slds-m-top_small">
+                        <lightning-button label="Back to the Opportunity" variant="brand" onclick={handleGoToOpp}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <div class="c-onboarding-sequence slds-m-vertical_small" role="status">
+                    <lightning-icon icon-name="utility:info" size="x-small" alternative-text="Info"></lightning-icon>
+                    <span class="slds-m-left_x-small">
+                        On Closed Won this sequence ran automatically: Client Onboarding Form → Key Project Roles
+                        capture → Exhibit assignment → Cost Info.
+                    </span>
+                </div>
+
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <!-- (a) Client Onboarding Form -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                        <lightning-card title="(a) Client Onboarding Form" icon-name="standard:form">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <p class="slds-text-body_small slds-m-bottom_x-small">{formStatusLabel}</p>
+                                <template lwc:if={formFallback}>
+                                    <div class="c-onboarding-warning slds-m-bottom_small" role="status">
+                                        <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Warning"></lightning-icon>
+                                        <span class="slds-m-left_x-small">No recipient defined: task created for manual assignment.</span>
+                                    </div>
+                                    <template lwc:if={fallbackTask}>
+                                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">
+                                            Task: “{fallbackTask.subject}” — {fallbackTask.assignedTo} ({fallbackTask.status})
+                                        </p>
+                                    </template>
+                                </template>
+                                <template lwc:if={formSent}>
+                                    <div class="c-onboarding-success slds-m-bottom_small" role="status">
+                                        <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Sent"></lightning-icon>
+                                        <span class="slds-m-left_x-small">Form sent to {ob.formRecipient}.</span>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-combobox
+                                        label="Project lead / recipient"
+                                        options={recipientOptions}
+                                        value={recipient}
+                                        placeholder="Select the identified project lead…"
+                                        onchange={handleRecipientChange}>
+                                    </lightning-combobox>
+                                    <lightning-button
+                                        class="slds-m-top_x-small"
+                                        label="Send Onboarding Form"
+                                        variant="brand"
+                                        onclick={handleSendForm}>
+                                    </lightning-button>
+                                </template>
+                            </div>
+                        </lightning-card>
+                    </div>
+
+                    <!-- (b) Key Project Roles -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                        <lightning-card title="(b) Key Project Roles" icon-name="standard:team_member">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <template lwc:if={ob.kickoffComplete}>
+                                    <div class="c-onboarding-success slds-m-bottom_small" role="status">
+                                        <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Complete"></lightning-icon>
+                                        <span class="slds-m-left_x-small">Kickoff complete — all Key Project Roles captured.</span>
+                                    </div>
+                                </template>
+                                <lightning-input label="Billing Contact" value={ob.roles.billingContact} data-role="billingContact" onchange={handleRoleChange}></lightning-input>
+                                <lightning-input label="Product Owner" value={ob.roles.productOwner} data-role="productOwner" onchange={handleRoleChange}></lightning-input>
+                                <lightning-input label="Executive Sponsor" value={ob.roles.executiveSponsor} data-role="executiveSponsor" onchange={handleRoleChange}></lightning-input>
+                                <lightning-input label="End Users" value={ob.roles.endUsers} data-role="endUsers" onchange={handleRoleChange}></lightning-input>
+                                <lightning-button
+                                    class="slds-m-top_x-small"
+                                    label="Mark Kickoff Complete"
+                                    variant="brand"
+                                    onclick={handleCompleteKickoff}>
+                                </lightning-button>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                    Kickoff cannot be marked complete until all roles are populated.
+                                </p>
+                            </div>
+                        </lightning-card>
+                    </div>
+
+                    <!-- (c) Exhibit Letter assignment -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                        <lightning-card title="(c) Exhibit Letter Assignment" icon-name="standard:contract">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <lightning-combobox
+                                    label="Exhibit"
+                                    options={exhibitOptions}
+                                    value={exhibitLetter}
+                                    onchange={handleExhibitChange}>
+                                </lightning-combobox>
+                                <lightning-input label="SOW" value={ob.exhibit.sow} read-only></lightning-input>
+                                <lightning-input label="Project Name" value={projectName} onchange={handleProjectNameChange}></lightning-input>
+                                <lightning-button
+                                    class="slds-m-top_x-small"
+                                    label="Assign Exhibit"
+                                    variant="brand"
+                                    onclick={handleAssignExhibit}>
+                                </lightning-button>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                    The Exhibit Letter is tied to the SOW and Project Name.
+                                </p>
+                            </div>
+                        </lightning-card>
+                    </div>
+
+                    <!-- (d) Cost Info -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                        <lightning-card title="(d) Cost Info — Opportunity / Project" icon-name="utility:moneybag">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input label="Amount" value={ob.costInfo.amount} data-cost="amount"></lightning-input>
+                                        <lightning-input label="Total Hours" value={ob.costInfo.totalHours} data-cost="totalHours"></lightning-input>
+                                        <lightning-input label="Credited Hours" value={ob.costInfo.creditedHours} data-cost="creditedHours"></lightning-input>
+                                        <lightning-input label="Hourly Rate" value={ob.costInfo.hourlyRate} data-cost="hourlyRate"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input label="Weeks" value={ob.costInfo.weeks} data-cost="weeks"></lightning-input>
+                                        <lightning-input label="Upfront Payment" value={ob.costInfo.upfrontPayment} data-cost="upfrontPayment"></lightning-input>
+                                        <lightning-input label="Net Terms" value={ob.costInfo.netTerms} data-cost="netTerms"></lightning-input>
+                                        <lightning-input type="date" label="MSA Executed Date" value={ob.costInfo.msaExecutedDate} data-cost="msaExecutedDate"></lightning-input>
+                                    </div>
+                                </div>
+                                <lightning-button
+                                    class="slds-m-top_x-small"
+                                    label="Save Cost Info"
+                                    variant="brand"
+                                    onclick={handleSaveCostInfo}>
+                                </lightning-button>
+                            </div>
+                        </lightning-card>
+                    </div>
+                </div>
+            </template>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Opportunity not found</p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Opportunities" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

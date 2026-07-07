@@ -1,0 +1,317 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasOpp}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:opportunity"
+                object-label={objectLabel}
+                title={opp.name}
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button
+                            label="Mark Stage as Complete"
+                            variant="brand"
+                            disabled={markCompleteDisabled}
+                            onclick={handleMarkStageComplete}>
+                        </lightning-button>
+                        <template lwc:if={showAwardLetterButton}>
+                            <lightning-button
+                                label="Log Award Letter"
+                                icon-name="utility:contract_doc"
+                                onclick={handleAwardLetter}>
+                            </lightning-button>
+                        </template>
+                        <template lwc:elseif={awardLetterReceived}>
+                            <lightning-button
+                                label="Award Letter received"
+                                icon-name="utility:check"
+                                disabled>
+                            </lightning-button>
+                        </template>
+                        <lightning-button label="Edit" variant="neutral"></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <div class="slds-m-top_small">
+                <ui-sales-path
+                    stages={stages}
+                    current-stage={opp.stage}
+                    closed-lost={isClosedLost}
+                    onsetstage={handleSetStage}>
+                </ui-sales-path>
+            </div>
+
+            <template lwc:if={isClosedLost}>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">Loss reason: {opp.lossReason}</p>
+            </template>
+
+            <!-- Closed Won next steps (stays prominent, above the tabs) -->
+            <template lwc:if={isClosedWon}>
+                <template lwc:if={isSales}>
+                    <div class="slds-m-top_small">
+                        <lightning-card title="Closed Won — Next Steps" icon-name="standard:task">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <lightning-button-group>
+                                    <lightning-button label="Onboarding Kickoff" variant="brand" onclick={handleGoToOnboarding}></lightning-button>
+                                    <lightning-button label="Sales-to-ClinOps Handoff (Asana)" onclick={handleGoToHandoff}></lightning-button>
+                                    <lightning-button label="Log Schedule Extension Notification" onclick={handleLogExtension}></lightning-button>
+                                </lightning-button-group>
+                                <template lwc:if={changeOrder}>
+                                    <p class="slds-m-top_small">
+                                        <lightning-button
+                                            variant="base"
+                                            label={changeOrder.name}
+                                            icon-name="standard:opportunity"
+                                            onclick={handleGoToChangeOrder}>
+                                        </lightning-button>
+                                    </p>
+                                </template>
+                                <div class="slds-m-top_x-small">
+                                    <ui-open-decision
+                                        title="Change Order sales process"
+                                        body="The Change Order stage set (Identified → Scoped → Contracting → Closed Won) is a proposed default — confirm in discovery.">
+                                    </ui-open-decision>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </div>
+                </template>
+            </template>
+
+            <div class="slds-m-top_small">
+                <lightning-tabset active-tab-value="details">
+                    <!-- DETAILS -->
+                    <lightning-tab label="Details" value="details">
+                        <lightning-card title="Opportunity Details" icon-name="standard:opportunity">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                <ui-detail-grid fields={detailFields}></ui-detail-grid>
+                                <template lwc:if={isChangeOrder}>
+                                    <div class="slds-m-top_x-small">
+                                        <lightning-button
+                                            variant="base"
+                                            label="Open parent opportunity"
+                                            icon-name="utility:back"
+                                            onclick={handleGoToParent}>
+                                        </lightning-button>
+                                        <div class="slds-m-top_x-small">
+                                            <ui-open-decision
+                                                title="Change Order sales process"
+                                                body="The Change Order stage set (Identified → Scoped → Contracting → Closed Won) is a proposed default — confirm in discovery.">
+                                            </ui-open-decision>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-card>
+
+                        <!-- Proposal / Quoting checkpoint (Sales only) -->
+                        <template lwc:if={isSales}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Proposal &amp; Quoting — external (SharePoint quote sheet workspace)" icon-name="standard:form">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <p class="slds-text-body_small">
+                                            Scoping and quoting (Scientific + ClinOps + Engineering input) happens outside
+                                            Salesforce in the SharePoint quote sheet workspace.
+                                        </p>
+                                        <div class="slds-m-top_x-small">
+                                            <lightning-button label="Open quote workspace" icon-name="utility:new_window"></lightning-button>
+                                        </div>
+                                        <!-- Hand-rolled slds-scoped-notification (warning) -->
+                                        <div class="c-quote-warning slds-m-top_small" role="status">
+                                            <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Warning"></lightning-icon>
+                                            <span class="slds-m-left_x-small">Line items may be out of date vs. external quote</span>
+                                        </div>
+                                        <div class="slds-m-top_small">
+                                            <lightning-input
+                                                type="checkbox"
+                                                label="CBO review / approval complete (required to advance from Request to Consideration)"
+                                                checked={opp.cboReviewed}
+                                                onchange={handleCboChange}>
+                                            </lightning-input>
+                                        </div>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </lightning-tab>
+
+                    <!-- RELATED -->
+                    <lightning-tab label="Related" value="related">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12">
+                                <!-- Opportunity Products -->
+                                <lightning-card title={productsHeading} icon-name="standard:product_item">
+                                    <lightning-button slot="actions" label="Add Product" onclick={handleAddProduct}></lightning-button>
+                                    <template lwc:if={hasProducts}>
+                                        <lightning-datatable
+                                            key-field="id"
+                                            data={products}
+                                            columns={productColumns}
+                                            draft-values={productDrafts}
+                                            hide-checkbox-column
+                                            onsave={handleProductSave}
+                                            onrowaction={handleProductRowAction}>
+                                        </lightning-datatable>
+                                    </template>
+                                    <template lwc:else>
+                                        <p class="slds-p-horizontal_medium slds-p-bottom_small slds-text-color_weak">No line items yet.</p>
+                                    </template>
+                                    <p class="slds-p-horizontal_medium slds-p-vertical_x-small slds-text-title">{productTotalLabel}</p>
+                                </lightning-card>
+
+                                <!-- Opportunity Sites (Sales only) -->
+                                <template lwc:if={isSales}>
+                                    <div class="slds-m-top_small">
+                                        <ui-related-list
+                                            title="Opportunity Sites"
+                                            icon-name="standard:study_related"
+                                            columns={siteColumns}
+                                            rows={sites}
+                                            empty-message="Opportunity Sites are created during Lead Conversion."
+                                            onrowaction={handleSiteRowAction}>
+                                        </ui-related-list>
+                                    </div>
+                                </template>
+
+                                <!-- Contact Roles -->
+                                <div class="slds-m-top_small">
+                                    <ui-related-list
+                                        title="Contact Roles"
+                                        icon-name="standard:contact"
+                                        columns={contactRoleColumns}
+                                        rows={contactRoles}
+                                        empty-message="No Opportunity Contact Roles yet."
+                                        onrowaction={handleContactRowAction}>
+                                    </ui-related-list>
+                                </div>
+
+                                <!-- Contracts -->
+                                <div class="slds-m-top_small">
+                                    <ui-related-list
+                                        title="Contracts"
+                                        icon-name="standard:contract"
+                                        columns={contractColumns}
+                                        rows={contracts}
+                                        empty-message="No contracts yet."
+                                        onrowaction={handleContractRowAction}>
+                                    </ui-related-list>
+                                </div>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                                <!-- Opportunity Team -->
+                                <lightning-card title={teamHeading} icon-name="standard:team_member">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <ul>
+                                            <template for:each={team} for:item="member">
+                                                <li key={member.id} class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                                                    <span>
+                                                        <strong>{member.name}</strong>
+                                                        <lightning-badge class="slds-m-left_x-small" label={member.role}></lightning-badge>
+                                                    </span>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:close"
+                                                        variant="bare"
+                                                        size="small"
+                                                        alternative-text="Remove team member"
+                                                        data-id={member.id}
+                                                        onclick={handleRemoveMember}>
+                                                    </lightning-button-icon>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                        <div class="slds-m-top_small">
+                                            <lightning-input label="Name" value={newMemberName} onchange={handleMemberNameChange}></lightning-input>
+                                            <lightning-combobox
+                                                class="slds-m-top_xx-small"
+                                                label="Role"
+                                                options={roleOptions}
+                                                value={newMemberRole}
+                                                placeholder="Select role…"
+                                                onchange={handleMemberRoleChange}>
+                                            </lightning-combobox>
+                                            <lightning-button
+                                                class="slds-m-top_x-small"
+                                                label="Add Team Member"
+                                                disabled={addMemberDisabled}
+                                                onclick={handleAddMember}>
+                                            </lightning-button>
+                                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                                Add or remove without admin friction.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </lightning-card>
+
+                                <!-- Slack -->
+                                <div class="slds-m-top_small">
+                                    <ui-slack-panel opp-id={opp.id}></ui-slack-panel>
+                                </div>
+                            </div>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- ACTIVITY -->
+                    <lightning-tab label="Activity" value="activity">
+                        <lightning-card title="Activity" icon-name="standard:task">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <template lwc:if={hasTasks}>
+                                    <p class="slds-text-title_caps slds-m-bottom_x-small">Open Tasks</p>
+                                    <template for:each={tasks} for:item="task">
+                                        <div key={task.id} class="c-opp-task slds-m-bottom_x-small">
+                                            <p class="slds-text-body_small"><strong>{task.subject}</strong></p>
+                                            <p class="slds-text-body_small slds-text-color_weak">
+                                                {task.assignedTo} • Due {task.dueDate} • {task.priority} • {task.status}
+                                            </p>
+                                            <p class="slds-text-body_small slds-text-color_weak">{task.origin}</p>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template lwc:if={hasActivities}>
+                                    <p class="slds-text-title_caps slds-m-vertical_x-small">Timeline</p>
+                                    <ul class="slds-timeline">
+                                        <template for:each={activities} for:item="item">
+                                            <li key={item.id} class="slds-timeline__item">
+                                                <div class="slds-media slds-m-bottom_small">
+                                                    <div class="slds-media__figure">
+                                                        <lightning-icon icon-name={item.iconName} size="small" alternative-text={item.type}></lightning-icon>
+                                                    </div>
+                                                    <div class="slds-media__body">
+                                                        <div class="slds-grid slds-grid_align-spread">
+                                                            <p><strong>{item.subject}</strong></p>
+                                                            <p class="slds-text-body_small slds-text-color_weak slds-no-flex">{item.time}</p>
+                                                        </div>
+                                                        <p class="slds-text-body_small slds-m-top_xx-small">{item.detail}</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template lwc:elseif={hasTasks}>
+                                    <span></span>
+                                </template>
+                                <template lwc:else>
+                                    <p class="slds-text-color_weak slds-text-body_small">No activity yet.</p>
+                                </template>
+                            </div>
+                        </lightning-card>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Opportunity not found</p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                    The journey Opportunity is created by the custom Lead Conversion (journey step 4).
+                </p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Opportunities" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

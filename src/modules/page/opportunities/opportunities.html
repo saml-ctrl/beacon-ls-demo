@@ -1,0 +1,34 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <ui-page-header
+            variant="object-home"
+            icon-name="standard:opportunity"
+            object-label="Opportunities"
+            title={activeViewLabel}
+            meta-text={metaText}>
+            <ui-list-view-switcher
+                slot="switcher"
+                views={listViews}
+                active-view={activeView}
+                onviewchange={handleViewChange}>
+            </ui-list-view-switcher>
+            <div slot="actions">
+                <lightning-button-group>
+                    <lightning-button label="New" variant="neutral"></lightning-button>
+                    <lightning-button label="Import" variant="neutral"></lightning-button>
+                </lightning-button-group>
+            </div>
+        </ui-page-header>
+
+        <lightning-datatable
+            key-field="id"
+            data={viewRows}
+            columns={columns}
+            sorted-by={sortedBy}
+            sorted-direction={sortedDirection}
+            hide-checkbox-column
+            onsort={handleSort}
+            onrowaction={handleRowAction}>
+        </lightning-datatable>
+    </div>
+</template>

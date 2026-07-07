@@ -1,0 +1,21 @@
+<template>
+    <lightning-card icon-name="utility:lock" title="Field Audit Trail — Shield">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template lwc:if={hasEntries}>
+                <ul>
+                    <template for:each={entries} for:item="entry">
+                        <li key={entry.id} class="c-audit-entry">
+                            <p class="c-audit-entry__time">{entry.time}</p>
+                            <p class="slds-text-body_small"><strong>{entry.event}</strong></p>
+                            <p class="slds-text-body_small">{entry.change}</p>
+                            <p class="slds-text-body_small slds-text-color_weak">{entry.actor}</p>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-color_weak slds-text-body_small">No audit entries yet — entries append as the agreement moves through Adobe Acrobat Sign.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

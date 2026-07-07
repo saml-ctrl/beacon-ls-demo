@@ -1,5 +1,5 @@
 .lightning-layout_custom {
-    --_slds-c-globalheader-color-background: var(--slds-g-color-surface-container-1, #ffffff);
+    --slds-c-globalheader-color-background: var(--slds-g-color-surface-container-1, #ffffff);
 }
 
 .lightning-button-icon_custom,
@@ -9,5 +9,5 @@
 }
 
 .lightning-button-menu_custom {
-    border-inline-end-width: 1px;
+    border-inline-end-width: var(--slds-g-sizing-border-1, 1px);
 }

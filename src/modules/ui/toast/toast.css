@@ -1,0 +1,13 @@
+.c-toast-container {
+    /* Sits below the global header; above modals' backdrop is not needed for a demo. */
+    top: var(--slds-g-spacing-9, 3.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    width: max-content;
+    max-width: 40rem;
+}
+
+.c-toast-item {
+    margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+}

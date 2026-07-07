@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import fs from 'fs';
 import lwc from 'vite-plugin-lwc';
 import {
   resolveIconTemplatesPlugin,
@@ -19,6 +20,50 @@ function isLightningBaseComponentsLwcRollupWarning(warning) {
     LBC_UNDER_NODE_MODULES.test(String(id)) ||
     LBC_UNDER_NODE_MODULES.test(String(message))
   );
+}
+
+/**
+ * Windows fix: @lwc/rollup-plugin resolves missing implicit component
+ * templates (e.g. lightning/datatable has datatable.js but no datatable.html)
+ * to a virtual "@lwc/resources/empty_html.js" id built with path.sep. On
+ * Windows the backslash id doesn't round-trip through Vite's id
+ * normalization, so the raw ".html?import" request 404s and the whole module
+ * graph fails ("stuck at Loading…"). This plugin intercepts implicit template
+ * imports whose .html file doesn't exist and serves the same empty module the
+ * LWC plugin would have served ("export default void 0"). On POSIX systems it
+ * simply front-runs the identical built-in behavior.
+ */
+function implicitLwcTemplateFallbackPlugin() {
+  const VIRTUAL_ID = '\0lwc-implicit-empty-template.js';
+  let root = process.cwd();
+  return {
+    name: 'lwc-implicit-template-fallback',
+    enforce: 'pre',
+    configResolved(config) {
+      root = config.root;
+    },
+    resolveId(source, importer) {
+      if (!importer) return null;
+      const cleanSource = source.split('?')[0];
+      if (!cleanSource.endsWith('.html')) return null;
+      const cleanImporter = importer.split('?')[0];
+      // Implicit template import: ./name.html imported by .../name.js
+      const sourceBase = path.basename(cleanSource, '.html');
+      const importerBase = path.basename(cleanImporter, path.extname(cleanImporter));
+      if (sourceBase !== importerBase) return null;
+      const candidate = cleanSource.startsWith('/')
+        ? path.join(root, cleanSource)
+        : path.resolve(path.dirname(cleanImporter), cleanSource);
+      if (fs.existsSync(candidate)) return null;
+      return VIRTUAL_ID;
+    },
+    load(id) {
+      if (id === VIRTUAL_ID) {
+        return 'export default void 0;';
+      }
+      return null;
+    },
+  };
 }
 
 function suppressLbcLwcLoggerNoisePlugin() {
@@ -43,6 +88,7 @@ function suppressLbcLwcLoggerNoisePlugin() {
 export default defineConfig({
   base: './',
   plugins: [
+    implicitLwcTemplateFallbackPlugin(),
     suppressLbcLwcLoggerNoisePlugin(),
     resolveIconTemplatesPlugin(),
     lwc({

@@ -1,0 +1,47 @@
+<template>
+    <footer class="c-presenter-bar" aria-label="Demo presenter bar">
+        <div class="c-presenter-bar__inner slds-grid slds-grid_vertical-align-center slds-grid_align-spread slds-p-horizontal_small">
+            <div class="slds-grid slds-grid_vertical-align-center c-presenter-bar__meta">
+                <lightning-icon icon-name="utility:steps" size="x-small" alternative-text="Journey steps"></lightning-icon>
+                <span class="slds-m-left_x-small slds-text-title_caps">Journey</span>
+                <span class="slds-m-left_small c-presenter-bar__step-label slds-truncate" title={currentLabel}>{currentLabel}</span>
+            </div>
+            <nav class="c-presenter-bar__chips" aria-label="Journey steps 0 to 11">
+                <template for:each={steps} for:item="s">
+                    <button
+                        key={s.n}
+                        type="button"
+                        class={s.chipClass}
+                        data-step={s.n}
+                        title={s.title}
+                        onclick={handleChip}>{s.n}</button>
+                </template>
+            </nav>
+            <div class="slds-grid slds-grid_vertical-align-center">
+                <lightning-button-group>
+                    <lightning-button
+                        label="Back"
+                        icon-name="utility:chevronleft"
+                        disabled={backDisabled}
+                        onclick={handleBack}>
+                    </lightning-button>
+                    <lightning-button
+                        label="Next"
+                        icon-name="utility:chevronright"
+                        icon-position="right"
+                        variant="brand"
+                        disabled={nextDisabled}
+                        onclick={handleNext}>
+                    </lightning-button>
+                </lightning-button-group>
+                <lightning-button
+                    class="slds-m-left_small"
+                    label="Reset Demo"
+                    icon-name="utility:refresh"
+                    variant="destructive-text"
+                    onclick={handleReset}>
+                </lightning-button>
+            </div>
+        </div>
+    </footer>
+</template>

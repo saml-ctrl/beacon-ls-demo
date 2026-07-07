@@ -1,89 +1,88 @@
-import { LightningElement } from 'lwc';
-import { getCurrentRoute, navigate } from '../../../router';
-import { getContactById } from 'data/contacts';
-
-const DETAIL_FIELDS = [
-    { key: 'name', label: 'Full Name', fieldName: 'name' },
-    { key: 'company', label: 'Account Name', fieldName: 'company' },
-    { key: 'title', label: 'Title', fieldName: 'title' },
-    { key: 'department', label: 'Department', fieldName: 'department' },
-    { key: 'email', label: 'Email', fieldName: 'email', type: 'email' },
-    { key: 'phone', label: 'Phone', fieldName: 'phone', type: 'tel' },
-    { key: 'mobile', label: 'Mobile', fieldName: 'mobile', type: 'tel' },
-    { key: 'mailingAddress', label: 'Mailing Address', fieldName: 'mailingAddress' },
-    { key: 'description', label: 'Description', fieldName: 'description', component: 'textarea', fullWidth: true }
-];
-
-const ACTIVITY_ITEMS = [
-    { id: 'a1', type: 'call', iconName: 'standard:log_a_call', subject: 'Follow-up call', date: '3 days ago', description: 'Discussed renewal timeline and next steps.' },
-    { id: 'a2', type: 'email', iconName: 'standard:email', subject: 'Proposal sent', date: '1 week ago', description: 'Sent updated pricing proposal via email.' },
-    { id: 'a3', type: 'event', iconName: 'standard:event', subject: 'Quarterly review meeting', date: '2 weeks ago', description: 'Reviewed Q4 results and Q1 goals.' },
-    { id: 'a4', type: 'call', iconName: 'standard:log_a_call', subject: 'Introductory call', date: '1 month ago', description: 'Initial discovery call to understand requirements.' }
-];
+import { LightningElement, track } from 'lwc';
+import { subscribe, getCurrentRoute, navigate } from '../../../router';
+import { getContact, getOpportunities, getState, subscribeStore } from 'data/store';
 
 export default class ContactDetail extends LightningElement {
-    contact = null;
-    isFollowing = false;
-    activityItems = ACTIVITY_ITEMS;
+    @track contact = null;
+    @track engagement = [];
+    @track relatedOpps = [];
 
     connectedCallback() {
-        const route = getCurrentRoute();
-        const id = route?.params?.id;
-        if (id) {
-            this.contact = getContactById(id);
-        }
+        this._unsubRoute = subscribe(() => this.load());
+        this._unsubStore = subscribeStore(() => this.load());
+        this.load();
+    }
+
+    disconnectedCallback() {
+        this._unsubRoute?.();
+        this._unsubStore?.();
+    }
+
+    load() {
+        const id = getCurrentRoute()?.params?.id;
+        const contact = id ? getContact(id) : null;
+        this.contact = contact ? { ...contact } : null;
+        this.engagement = contact
+            ? (contact.mcae || []).map((e) => ({ ...e, time: new Date(e.date).toLocaleString() }))
+            : [];
+        this.relatedOpps = contact
+            ? getState()
+                  .opportunityContactRoles.filter((r) => r.contactId === contact.id)
+                  .map((r) => {
+                      const opp = getOpportunities().find((o) => o.id === r.oppId);
+                      return { id: r.id, oppId: r.oppId, role: r.role, oppName: opp ? opp.name : r.oppId };
+                  })
+            : [];
     }
 
     get hasContact() {
-        return this.contact !== null;
+        return !!this.contact;
     }
 
-    get cardFields() {
-        if (!this.contact) return [];
-        return DETAIL_FIELDS.map(field => ({
-            ...field,
-            value: field.fieldName === 'mailingAddress'
-                ? this.mailingAddress
-                : this.contact[field.fieldName],
-            isTextarea: field.component === 'textarea',
-            cssClass: field.fullWidth ? 'c-contact-details-grid__full-width' : ''
-        }));
-    }
-
-    get contactName() {
-        return this.contact?.name || 'Unknown Contact';
-    }
-
-    get detailFields() {
-        if (!this.contact) return [];
+    get headerFields() {
+        const c = this.contact;
+        if (!c) return [];
         return [
-            { label: 'Company', value: this.contact.company },
-            { label: 'Title', value: this.contact.title },
-            { label: 'Email', value: this.contact.email, type: 'email' },
-            { label: 'Phone', value: this.contact.phone, type: 'tel' }
+            { label: 'Title', value: c.title },
+            { label: 'Account', value: c.accountName },
+            { label: 'Role', value: c.role },
+            { label: 'Email', value: c.email },
+            { label: 'Phone', value: c.phone },
         ];
     }
 
-    get mailingAddress() {
-        if (!this.contact) return '';
+    get hasEngagement() {
+        return this.engagement.length > 0;
+    }
+
+    /** Representative Contact fields for the Details tab. */
+    get detailFields() {
         const c = this.contact;
-        return `${c.mailingStreet}, ${c.mailingCity}, ${c.mailingState} ${c.mailingZip}`;
+        if (!c) return [];
+        return [
+            { label: 'Name', value: c.name },
+            { label: 'Title', value: c.title },
+            { label: 'Account', value: c.accountName },
+            { label: 'Role', value: c.role },
+            { label: 'Email', value: c.email, type: 'email' },
+            { label: 'Phone', value: c.phone, type: 'tel' },
+            { label: 'LinkedIn', value: c.linkedin || '—' },
+            { label: 'Enriched (Clay)', value: c.enriched, type: 'checkbox' },
+        ];
     }
 
-    get followVariant() {
-        return this.isFollowing ? 'success' : 'neutral';
+    get hasRelatedOpps() {
+        return this.relatedOpps.length > 0;
     }
 
-    get followLabel() {
-        return this.isFollowing ? 'Following' : 'Follow';
+    handleAccountClick() {
+        if (this.contact?.accountId) {
+            navigate(`/accounts/${this.contact.accountId}`);
+        }
     }
 
-    get followIconName() {
-        return this.isFollowing ? 'utility:check' : 'utility:add';
-    }
-
-    handleFollow() {
-        this.isFollowing = !this.isFollowing;
+    handleOppClick(event) {
+        navigate(`/opportunities/${event.currentTarget.dataset.oppId}`);
     }
 
     handleBackToList() {

@@ -1,0 +1,69 @@
+.c-convert-dup {
+    background: var(--slds-g-color-surface-container-1, #fafafa);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-convert-error {
+    display: flex;
+    align-items: center;
+    background: var(--slds-g-color-error-container-1, #feded8);
+    color: var(--slds-g-color-on-error-1, #8e030f);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    text-align: left;
+}
+
+.c-convert-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.c-convert-connector {
+    width: var(--slds-g-sizing-border-1, 1px);
+    height: var(--slds-g-sizing-6, 1.25rem);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.c-convert-children {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    border-top: 1px solid var(--slds-g-color-border-1, #c9c9c9);
+    padding-top: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-convert-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 0.25rem);
+    background: var(--slds-g-color-surface-1, #fff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    cursor: pointer;
+    max-width: 11rem;
+}
+
+.c-convert-node:hover {
+    background: var(--slds-g-color-surface-container-1, #fafafa);
+}
+
+.c-convert-node_root {
+    max-width: var(--slds-g-sizing-15, 20rem);
+}
+
+.c-convert-node__label {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--slds-g-color-on-surface-3, #181818);
+}
+
+.c-convert-node__sub {
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--slds-g-color-on-surface-1, #747474);
+}

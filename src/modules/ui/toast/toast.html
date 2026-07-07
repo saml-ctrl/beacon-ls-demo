@@ -1,0 +1,30 @@
+<template>
+    <div class="slds-notify_container slds-is-fixed c-toast-container">
+        <template for:each={toasts} for:item="t">
+            <div key={t.id} class="c-toast-item">
+                <div class={t.notifyClass} role="status">
+                    <span class="slds-assistive-text">{t.variant}</span>
+                    <span class="slds-icon_container slds-m-right_small slds-no-flex slds-align-top">
+                        <lightning-icon icon-name={t.iconName} size="small" variant="inverse" alternative-text={t.variant}></lightning-icon>
+                    </span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">{t.title}</h2>
+                        <template lwc:if={t.message}>
+                            <p class="slds-text-body_small">{t.message}</p>
+                        </template>
+                    </div>
+                    <div class="slds-notify__close">
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            variant="bare-inverse"
+                            size="small"
+                            alternative-text="Close"
+                            data-id={t.id}
+                            onclick={handleClose}>
+                        </lightning-button-icon>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,64 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <ui-page-header
+            variant="object-home"
+            icon-name="standard:study"
+            object-label="Research Studies"
+            title="Intake Triage — This Week's Qualified Studies"
+            meta-text={metaText}>
+            <lightning-button-icon
+                slot="switcher"
+                icon-name="utility:down"
+                variant="bare"
+                size="small"
+                alternative-text="Switch list view"
+                title="Switch list view">
+            </lightning-button-icon>
+            <div slot="actions">
+                <lightning-button-group>
+                    <lightning-button label="Refresh" variant="neutral"></lightning-button>
+                    <lightning-button label="Import" variant="neutral"></lightning-button>
+                </lightning-button-group>
+            </div>
+        </ui-page-header>
+
+        <ui-integration-badge
+            label="Citeline + ClinicalTrials.gov → MuleSoft → Salesforce"
+            direction="inbound"
+            note="daily batch | create + update | dedupe on Citeline trial ID. Phase 1 scope: single API, up to two MuleSoft flows, up to three Salesforce objects. Customer responsible for licensing and API tokens (Citeline, ClinicalTrials.gov).">
+        </ui-integration-badge>
+
+        <template lwc:if={hasQueue}>
+            <lightning-datatable
+                key-field="id"
+                data={queue}
+                columns={triageColumns}
+                hide-checkbox-column
+                onrowaction={handleRowAction}>
+            </lightning-datatable>
+            <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                ICP flag/score auto-set by a rules-based Flow at ingestion. Use the row action
+                “Approve &amp; Assign” to move a study out of triage.
+            </p>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_small">No unassigned studies this week — all triaged.</p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Go to Research Studies" variant="brand" onclick={handleGoToStudies}></lightning-button>
+                </div>
+            </div>
+        </template>
+
+        <div class="slds-m-top_medium">
+            <ui-related-list
+                title="Recently Assigned"
+                icon-name="standard:study"
+                columns={assignedColumns}
+                rows={assigned}
+                empty-message="No studies assigned yet."
+                onrowaction={handleAssignedRowAction}>
+            </ui-related-list>
+        </div>
+    </div>
+</template>

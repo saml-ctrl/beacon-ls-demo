@@ -1,0 +1,179 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasOpp}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:task"
+                object-label="Handoff"
+                title="Sales-to-ClinOps Handoff — Asana"
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button label="Open Opportunity" onclick={handleGoToOpp}></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <template lwc:if={notCreated}>
+                <div class="slds-p-around_large slds-text-align_center">
+                    <p class="slds-text-heading_small">The Asana project is created automatically when this Opportunity is Closed Won.</p>
+                    <div class="slds-m-top_small">
+                        <lightning-button label="Back to the Opportunity" variant="brand" onclick={handleGoToOpp}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <ui-integration-badge
+                    label="MuleSoft ↔ Asana"
+                    direction="outbound + inbound"
+                    note="Project creation outbound on Closed Won | project status inbound | up to 4 alert task types. Customer responsible for licensing and API tokens (Asana).">
+                </ui-integration-badge>
+                <ui-open-decision
+                    title="Asana project creation"
+                    body="Manual initially; automation targeted for Phase 1b — confirm in discovery.">
+                </ui-open-decision>
+
+                <div class="slds-grid slds-wrap slds-gutters slds-m-top_x-small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
+                        <lightning-card title="Asana Project" icon-name="standard:task">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <p class="slds-text-heading_small">{asana.projectName}</p>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{asana.asanaId}</p>
+
+                                <div class="slds-m-bottom_small">
+                                    <template for:each={statusChips} for:item="chip">
+                                        <span key={chip.id} class={chip.cssClass}>{chip.label}</span>
+                                    </template>
+                                </div>
+
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input label="Devices needed" value={asana.details.devicesNeeded} read-only></lightning-input>
+                                        <lightning-input label="Site list" value={asana.details.siteList} read-only></lightning-input>
+                                        <lightning-input label="Study protocol" value={asana.details.studyProtocol} read-only></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-input label="Sponsor contacts" value={asana.details.sponsorContacts} read-only></lightning-input>
+                                        <lightning-input label="Proposed start date" value={asana.details.proposedStartDate} read-only></lightning-input>
+                                    </div>
+                                </div>
+
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                                    Only project-level status syncs back to the closed opportunity (records matched
+                                    on Asana ID). There is NO task-level bidirectional sync.
+                                </p>
+
+                                <div class="slds-m-top_small">
+                                    <lightning-button
+                                        label="Simulate PM status update in Asana"
+                                        variant="brand"
+                                        icon-name="utility:sync"
+                                        disabled={atFinalStatus}
+                                        onclick={handleAdvanceStatus}>
+                                    </lightning-button>
+                                    <template lwc:if={atFinalStatus}>
+                                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                                            Project is at Late Stage: Renewal Window — the renewal alert task has been created.
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <template lwc:if={asana.history.length}>
+                                    <p class="slds-text-title_caps slds-m-top_small slds-m-bottom_x-small">Status history (inbound sync)</p>
+                                    <ul>
+                                        <template for:each={asana.history} for:item="entry">
+                                            <li key={entry.id} class="slds-text-body_small">
+                                                {entry.status} <span class="slds-text-color_weak">— {entry.time}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                            </div>
+                        </lightning-card>
+
+                        <template lwc:if={renewalTask}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Renewal Window Alert" icon-name="standard:task">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <div class="c-handoff-warning slds-m-bottom_small" role="status">
+                                            <lightning-icon icon-name="utility:warning" size="x-small" alternative-text="Warning"></lightning-icon>
+                                            <span class="slds-m-left_x-small">Project entering renewal window.</span>
+                                        </div>
+                                        <p class="slds-text-body_small"><strong>{renewalTask.subject}</strong></p>
+                                        <p class="slds-text-body_small slds-text-color_weak">
+                                            {renewalTask.assignedTo} • Due {renewalTask.dueDate} • {renewalTask.priority} • {renewalTask.origin}
+                                        </p>
+                                        <lightning-button
+                                            class="slds-m-top_x-small"
+                                            label="Open Opportunity — log the Schedule Extension Notification"
+                                            variant="brand"
+                                            onclick={handleGoToOpp}>
+                                        </lightning-button>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
+                        <lightning-card title="Program Manager" icon-name="standard:team_member">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <template lwc:if={pmAssigned}>
+                                    <div class="c-handoff-success" role="status">
+                                        <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Synced"></lightning-icon>
+                                        <span class="slds-m-left_x-small">{pmSyncedLabel}</span>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-combobox
+                                        label="Program Manager"
+                                        options={pmOptions}
+                                        value={selectedPm}
+                                        placeholder="Select the ClinOps Program Manager…"
+                                        onchange={handlePmChange}>
+                                    </lightning-combobox>
+                                    <lightning-button
+                                        class="slds-m-top_x-small"
+                                        label="Assign PM"
+                                        variant="brand"
+                                        onclick={handleAssignPm}>
+                                    </lightning-button>
+                                </template>
+                            </div>
+                        </lightning-card>
+
+                        <template lwc:if={postSowChannel}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Slack — post-SOW channel" icon-name="standard:slack">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <p class="slds-text-heading_small">{postSowChannel.name}</p>
+                                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">{postSowChannel.purpose}</p>
+                                        <p class="slds-text-body_small slds-m-bottom_x-small">Members: {postSowChannel.memberLabel}</p>
+                                        <template for:each={postSowChannel.messageList} for:item="message">
+                                            <div key={message.id} class="slds-m-bottom_x-small">
+                                                <p class="slds-text-body_small">
+                                                    <strong>{message.author}</strong>
+                                                    <span class="slds-m-left_x-small slds-text-color_weak">{message.time}</span>
+                                                </p>
+                                                <p class="slds-text-body_small">{message.text}</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Opportunity not found</p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Opportunities" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

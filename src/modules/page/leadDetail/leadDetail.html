@@ -1,0 +1,126 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasLead}>
+            <ui-page-header
+                variant="record-home"
+                icon-name="standard:lead"
+                object-label="Lead"
+                title={lead.name}
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button
+                            label={enrichLabel}
+                            disabled={enrichDisabled}
+                            icon-name="utility:magicwand"
+                            onclick={handleEnrich}>
+                        </lightning-button>
+                        <lightning-button
+                            label="Convert"
+                            variant="brand"
+                            disabled={convertDisabled}
+                            onclick={handleConvert}>
+                        </lightning-button>
+                        <lightning-button label="Edit" variant="neutral"></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <template lwc:if={lead.converted}>
+                <!-- Hand-rolled slds-scoped-notification-style success banner -->
+                <div class="c-lead-converted slds-m-vertical_x-small" role="status">
+                    <lightning-icon icon-name="utility:success" size="x-small" alternative-text="Converted"></lightning-icon>
+                    <span class="slds-m-left_x-small">This lead has been converted.</span>
+                    <template for:each={convertedLinks} for:item="link">
+                        <lightning-button
+                            key={link.id}
+                            class="slds-m-left_x-small"
+                            variant="base"
+                            label={link.label}
+                            data-path={link.path}
+                            onclick={handleConvertedLink}>
+                        </lightning-button>
+                    </template>
+                </div>
+            </template>
+
+            <div class="slds-m-top_small">
+                <lightning-tabset active-tab-value="details">
+                    <lightning-tab label="Details" value="details">
+                        <lightning-card title="Lead Details" icon-name="standard:lead">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                <template lwc:if={lead.enriched}>
+                                    <div class="slds-m-bottom_small">
+                                        <lightning-badge label="Verified by Clay" icon-name="utility:success"></lightning-badge>
+                                        <span class="slds-text-body_small slds-text-color_weak slds-m-left_small">
+                                            {lead.enrichmentNote} • {enrichedAtFormatted}
+                                        </span>
+                                    </div>
+                                </template>
+                                <ui-detail-grid fields={detailFields}></ui-detail-grid>
+                                <lightning-button
+                                    class="slds-m-top_x-small"
+                                    variant="base"
+                                    label="Open Research Study"
+                                    onclick={handleStudyClick}>
+                                </lightning-button>
+                            </div>
+                        </lightning-card>
+                        <div class="slds-m-top_small">
+                            <ui-integration-badge
+                                label="Clay → Salesforce (managed package)"
+                                direction="inbound"
+                                note="On-demand and one-time-on-assignment enrichment only — no bulk enrichment. Per-transaction / ad hoc.">
+                            </ui-integration-badge>
+                        </div>
+                    </lightning-tab>
+                    <lightning-tab label="Engagement History" value="engagement">
+                        <lightning-card title="Engagement History — Marketing Cloud Account Engagement" icon-name="standard:campaign">
+                            <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{engagementScoreLabel}</p>
+                                <template lwc:if={hasEngagement}>
+                                    <ul class="slds-timeline">
+                                        <template for:each={engagement} for:item="item">
+                                            <li key={item.id} class="slds-timeline__item">
+                                                <div class="slds-media slds-m-bottom_small">
+                                                    <div class="slds-media__figure">
+                                                        <lightning-icon icon-name={item.iconName} size="small" alternative-text={item.type}></lightning-icon>
+                                                    </div>
+                                                    <div class="slds-media__body">
+                                                        <div class="slds-grid slds-grid_align-spread">
+                                                            <p><strong>{item.subject}</strong></p>
+                                                            <p class="slds-text-body_small slds-text-color_weak slds-no-flex">{item.time}</p>
+                                                        </div>
+                                                        <p class="slds-text-body_small slds-m-top_xx-small">{item.detail}</p>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template lwc:else>
+                                    <p class="slds-text-color_weak slds-text-body_small">No engagement activity synced yet.</p>
+                                </template>
+                            </div>
+                        </lightning-card>
+                        <div class="slds-m-top_small">
+                            <ui-integration-badge
+                                label="Marketing Cloud Account Engagement ↔ Salesforce"
+                                direction="sync"
+                                note="Engagement data inbound to the Lead/Contact timeline (opens, form fills, campaign membership).">
+                            </ui-integration-badge>
+                        </div>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Lead not found</p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Leads" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

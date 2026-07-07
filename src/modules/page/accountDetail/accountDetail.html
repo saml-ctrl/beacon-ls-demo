@@ -1,0 +1,87 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <template lwc:if={hasAccount}>
+            <ui-page-header
+                variant="record-home"
+                icon-name={headerIcon}
+                object-label="Account"
+                title={account.name}
+                fields={headerFields}>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button label="Edit" variant="neutral"></lightning-button>
+                        <lightning-button label="New Contact" variant="neutral"></lightning-button>
+                    </lightning-button-group>
+                </div>
+            </ui-page-header>
+
+            <div class="slds-m-top_small">
+                <lightning-tabset active-tab-value="details">
+                    <lightning-tab label="Details" value="details">
+                        <lightning-card title="Account Details" icon-name={headerIcon}>
+                            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                <ui-detail-grid fields={detailFields}></ui-detail-grid>
+                            </div>
+                        </lightning-card>
+                        <template lwc:if={study}>
+                            <div class="slds-m-top_small">
+                                <lightning-card title="Research Study" icon-name="standard:study">
+                                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                                        <lightning-button
+                                            variant="base"
+                                            label={study.name}
+                                            onclick={handleStudyClick}>
+                                        </lightning-button>
+                                    </div>
+                                </lightning-card>
+                            </div>
+                        </template>
+                    </lightning-tab>
+                    <lightning-tab label="Related" value="related">
+                        <template lwc:if={isOrganization}>
+                            <ui-related-list
+                                title="Contacts"
+                                icon-name="standard:contact"
+                                columns={contactColumns}
+                                rows={contacts}
+                                empty-message="No contacts on this account yet."
+                                onrowaction={handleContactRowAction}>
+                            </ui-related-list>
+                            <div class="slds-m-top_small">
+                                <ui-related-list
+                                    title="Opportunities"
+                                    icon-name="standard:opportunity"
+                                    columns={oppColumns}
+                                    rows={opportunities}
+                                    empty-message="No opportunities on this account yet."
+                                    onrowaction={handleOppRowAction}>
+                                </ui-related-list>
+                            </div>
+                        </template>
+                        <template lwc:if={isClinicalSite}>
+                            <ui-related-list
+                                title="Site Engagement (Opportunity Sites)"
+                                icon-name="standard:study_related"
+                                columns={engagementColumns}
+                                rows={engagements}
+                                empty-message="Not yet engaged on any Opportunity."
+                                onrowaction={handleEngagementRowAction}>
+                            </ui-related-list>
+                        </template>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_large slds-text-align_center">
+                <p class="slds-text-heading_medium">Account not found</p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                    The Neurocessa Therapeutics account is created by the custom Lead Conversion (journey step 4).
+                </p>
+                <div class="slds-m-top_small">
+                    <lightning-button label="Back to Accounts" variant="brand" onclick={handleBackToList}></lightning-button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

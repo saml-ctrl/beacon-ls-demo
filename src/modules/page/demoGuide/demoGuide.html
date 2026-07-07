@@ -1,0 +1,54 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <div class="slds-m-top_small">
+            <lightning-card icon-name="standard:life_sciences" title="Beacon Biosignals — Life Sciences Sales (Future-State Wireframe)">
+                <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                    <p>
+                        A clickable wireframe of the future-state Salesforce Life Sciences Cloud implementation for
+                        Beacon Biosignals — EEG-based clinical trial services sold to biopharma sponsors. This is
+                        <strong>not a real Salesforce org</strong>: everything runs locally on fictitious seed data so
+                        the full Life Sciences Sales lifecycle can be walked end to end during design discovery.
+                    </p>
+                    <ul class="slds-list_dotted slds-m-top_small">
+                        <li>Use the docked <strong>Journey bar</strong> at the bottom to step through the story 0 → 11 (Back / Next / Reset Demo).</li>
+                        <li>The <strong>Discovery Mode</strong> toggle (global header, default ON) shows integration badges and amber Open Decision flags; switch it OFF for a clean run-through.</li>
+                        <li>The floating <strong>theme switcher</strong> (bottom right) flips SLDS 1 vs SLDS 2 “Cosmos” and light/dark live — a demo talking point.</li>
+                    </ul>
+                </div>
+            </lightning-card>
+        </div>
+
+        <div class="slds-m-top_medium">
+            <lightning-card icon-name="utility:steps" title="The Journey — intake → conversion → pipeline → contracting → closed won → onboarding → handoff → change order → leadership view">
+                <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                    <div class="slds-grid slds-wrap slds-gutters">
+                        <template for:each={nodes} for:item="node">
+                            <div key={node.n} class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12 slds-m-bottom_small">
+                                <button type="button" class="c-guide-node" data-step={node.n} onclick={handleNodeClick}>
+                                    <span class="c-guide-node__number">{node.n}</span>
+                                    <span class="c-guide-node__body">
+                                        <span class="c-guide-node__label">{node.label}</span>
+                                        <span class="c-guide-node__desc">{node.description}</span>
+                                    </span>
+                                    <lightning-icon icon-name="utility:chevronright" size="xx-small" alternative-text="Open"></lightning-icon>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+
+        <div class="slds-m-top_medium slds-m-bottom_medium">
+            <lightning-card icon-name="utility:check" title="What this wireframe demonstrates">
+                <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                    <ul class="slds-list_dotted">
+                        <template for:each={highlights} for:item="item">
+                            <li key={item.id}>{item.text}</li>
+                        </template>
+                    </ul>
+                </div>
+            </lightning-card>
+        </div>
+    </div>
+</template>

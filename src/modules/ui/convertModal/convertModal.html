@@ -1,0 +1,82 @@
+<template>
+    <lightning-modal-header label="Convert Lead"></lightning-modal-header>
+    <lightning-modal-body>
+        <template lwc:if={isForm}>
+            <div class="slds-p-around_x-small">
+                <!-- Visible duplicate detection check -->
+                <div class="c-convert-dup slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                    <lightning-icon icon-name={duplicateIcon} size="x-small" alternative-text="Duplicate check"></lightning-icon>
+                    <div class="slds-m-left_x-small">
+                        <p class="slds-text-title">Duplicate check — Accounts &amp; Contacts</p>
+                        <p class="slds-text-body_small">{duplicateMessage}</p>
+                    </div>
+                </div>
+
+                <p class="slds-text-title_caps slds-m-bottom_x-small">This single flow will create</p>
+                <ul class="slds-m-bottom_small">
+                    <template for:each={willCreate} for:item="item">
+                        <li key={item.id} class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                            <lightning-icon icon-name={item.icon} size="x-small" alternative-text={item.label}></lightning-icon>
+                            <span class="slds-m-left_x-small">{item.label}</span>
+                        </li>
+                    </template>
+                </ul>
+
+                <lightning-input
+                    type="date"
+                    label="Close Date"
+                    value={closeDate}
+                    required
+                    message-when-value-missing="A value is required to create the Opportunity."
+                    onchange={handleDateChange}>
+                </lightning-input>
+
+                <template lwc:if={errorMessage}>
+                    <div class="c-convert-error slds-m-top_small" role="alert">
+                        <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" alternative-text="Error"></lightning-icon>
+                        <span class="slds-m-left_x-small">{errorMessage}</span>
+                    </div>
+                </template>
+
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                    Conversion is on-demand only — never triggered automatically by a stage.
+                </p>
+            </div>
+        </template>
+
+        <template lwc:if={isSuccess}>
+            <div class="slds-p-around_x-small slds-text-align_center">
+                <lightning-icon icon-name="utility:success" size="small" alternative-text="Converted"></lightning-icon>
+                <h2 class="slds-text-heading_medium slds-m-top_x-small slds-m-bottom_small">Lead converted</h2>
+                <!-- Linked-record diagram (hand-rolled boxes + connectors) -->
+                <div class="c-convert-diagram">
+                    <button type="button" class="c-convert-node c-convert-node_root" data-path={opportunityPath} onclick={handleChipClick}>
+                        <lightning-icon icon-name="standard:opportunity" size="small" alternative-text="Opportunity"></lightning-icon>
+                        <span class="c-convert-node__label">Neurocessa — NRX-214 Ph2 MDD — EEG Services</span>
+                        <span class="c-convert-node__sub">Opportunity • Qualification</span>
+                    </button>
+                    <div class="c-convert-connector" aria-hidden="true"></div>
+                    <div class="c-convert-children">
+                        <template for:each={createdChips} for:item="chip">
+                            <button key={chip.id} type="button" class="c-convert-node" data-path={chip.path} onclick={handleChipClick}>
+                                <lightning-icon icon-name={chip.icon} size="small" alternative-text={chip.label}></lightning-icon>
+                                <span class="c-convert-node__label">{chip.label}</span>
+                                <span class="c-convert-node__sub">{chip.sub}</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <template lwc:if={isForm}>
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button class="slds-m-left_x-small" label="Convert" variant="brand" onclick={handleConvert}></lightning-button>
+        </template>
+        <template lwc:if={isSuccess}>
+            <lightning-button label="Close" onclick={handleCancel}></lightning-button>
+            <lightning-button class="slds-m-left_x-small" label="Go to Opportunity" variant="brand" onclick={handleGoToOpportunity}></lightning-button>
+        </template>
+    </lightning-modal-footer>
+</template>

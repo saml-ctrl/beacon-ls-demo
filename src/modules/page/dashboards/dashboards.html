@@ -1,0 +1,135 @@
+<template>
+    <div class="slds-p-horizontal_medium">
+        <ui-page-header
+            variant="object-home"
+            icon-name="standard:dashboard"
+            object-label="Dashboards"
+            title="Life Sciences Sales — Leadership"
+            meta-text={metaText}>
+            <div slot="actions">
+                <lightning-button-group>
+                    <lightning-button label="Refresh" variant="neutral"></lightning-button>
+                    <lightning-button label="Subscribe" variant="neutral"></lightning-button>
+                </lightning-button-group>
+            </div>
+        </ui-page-header>
+
+        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+            <!-- 1. Open pipeline by stage -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="Open Pipeline by Stage" icon-name="standard:opportunity">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <template for:each={stageBars} for:item="row">
+                            <div key={row.id} class="c-dash-row">
+                                <span class="c-dash-row__label" title={row.label}>{row.label}</span>
+                                <svg class="c-dash-row__bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+                                    <rect x="0" y="0" width={row.pct} height="1"></rect>
+                                </svg>
+                                <span class="c-dash-row__value">{row.valueLabel}</span>
+                            </div>
+                        </template>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- 2. Pipeline by forecast category -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="Pipeline by Forecast Category" icon-name="standard:dashboard">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <template for:each={forecastBars} for:item="row">
+                            <div key={row.id} class="c-dash-row">
+                                <span class="c-dash-row__label">{row.label}</span>
+                                <svg class="c-dash-row__bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+                                    <rect x="0" y="0" width={row.pct} height="1"></rect>
+                                </svg>
+                                <span class="c-dash-row__value">{row.valueLabel}</span>
+                            </div>
+                        </template>
+                        <template lwc:if={closedLostNote}>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">{closedLostNote}</p>
+                        </template>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- 3. Pipeline by owner -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="Open Pipeline by Owner" icon-name="standard:team_member">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <template for:each={ownerBars} for:item="row">
+                            <div key={row.id} class="c-dash-row">
+                                <span class="c-dash-row__label">{row.label}</span>
+                                <svg class="c-dash-row__bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+                                    <rect x="0" y="0" width={row.pct} height="1"></rect>
+                                </svg>
+                                <span class="c-dash-row__value">{row.valueLabel}</span>
+                            </div>
+                        </template>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- 4. Stage velocity -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="Stage Velocity — Average Days in Stage" icon-name="standard:stage">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <template for:each={velocityBars} for:item="row">
+                            <div key={row.id} class="c-dash-row">
+                                <span class="c-dash-row__label">{row.label}</span>
+                                <svg class="c-dash-row__bar" viewBox="0 0 100 1" preserveAspectRatio="none" aria-hidden="true">
+                                    <rect x="0" y="0" width={row.pct} height="1"></rect>
+                                </svg>
+                                <span class="c-dash-row__value">{row.valueLabel}</span>
+                            </div>
+                        </template>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- 5. Contract status board -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="Contract Status Board" icon-name="standard:contract">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <div class="slds-grid slds-gutters">
+                            <template for:each={contractTiles} for:item="tile">
+                                <div key={tile.id} class="slds-col">
+                                    <div class={tile.cssClass}>
+                                        <p class="c-dash-tile__value">{tile.value}</p>
+                                        <p class="c-dash-tile__label">{tile.label}</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- 6. KOL engagement & enrichment -->
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-m-bottom_small">
+                <lightning-card title="KOL Engagement &amp; Enrichment" icon-name="standard:campaign">
+                    <div class="slds-p-horizontal_medium slds-p-bottom_small">
+                        <p class="slds-text-heading_large">{kol.pct}%</p>
+                        <p class="slds-text-body_small slds-m-bottom_x-small">{kol.label}</p>
+                        <lightning-progress-bar value={kol.pct} size="large"></lightning-progress-bar>
+                        <div class="slds-grid slds-gutters slds-m-top_small">
+                            <div class="slds-col">
+                                <p class="c-dash-tile__value">{kol.activities}</p>
+                                <p class="c-dash-tile__label">Engagement activities logged (MCAE)</p>
+                            </div>
+                            <div class="slds-col">
+                                <p class="c-dash-tile__value">{kol.openTasks}</p>
+                                <p class="c-dash-tile__label">Open tasks</p>
+                            </div>
+                        </div>
+                        <p class="c-dash-footer slds-text-body_small slds-text-color_weak">View Report</p>
+                    </div>
+                </lightning-card>
+            </div>
+        </div>
+    </div>
+</template>

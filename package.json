@@ -4,7 +4,7 @@
   "description": "Starter template for prototyping Salesforce experiences with LWC, Vite, SLDS, and Lightning Base Components",
   "author": "Salesforce UX",
   "scripts": {
-    "postinstall": "npm run skills:sync",
+    "postinstall": "node scripts/patch-lwc-windows.mjs && npm run skills:sync",
     "skills:sync": "node scripts/sync-afv-skills.mjs",
     "prebuild-icons": "node scripts/prebuild-icons.mjs",
     "dev": "node scripts/prebuild-icons.mjs && vite",

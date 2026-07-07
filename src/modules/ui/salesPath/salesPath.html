@@ -1,0 +1,52 @@
+<template>
+    <div class="c-sales-path">
+        <template lwc:if={closedLost}>
+            <div class="c-sales-path__lost slds-p-around_x-small slds-m-bottom_x-small" role="status">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="error" alternative-text="Closed Lost"></lightning-icon>
+                <span class="slds-m-left_x-small">This Opportunity is <strong>Closed Lost</strong>.</span>
+            </div>
+        </template>
+        <lightning-progress-indicator
+            type="path"
+            variant="base"
+            current-step={pathCurrentStep}
+            onstepfocus={handleStepFocus}>
+            <template for:each={stages} for:item="stage">
+                <lightning-progress-step
+                    key={stage.name}
+                    label={stage.name}
+                    value={stage.name}>
+                </lightning-progress-step>
+            </template>
+        </lightning-progress-indicator>
+
+        <template lwc:if={selected}>
+            <div class="c-sales-path__coach slds-m-top_x-small slds-p-around_small">
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap">
+                    <h3 class="slds-text-title_caps">{guidanceHeading}</h3>
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <lightning-badge label={selectedForecastLabel}></lightning-badge>
+                        <template lwc:if={showMarkCurrent}>
+                            <lightning-button
+                                class="slds-m-left_small"
+                                label="Mark as Current Stage"
+                                variant="brand"
+                                onclick={handleMarkCurrent}>
+                            </lightning-button>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-grid slds-wrap slds-gutters slds-m-top_x-small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <p class="slds-text-title">Entry criteria</p>
+                        <p class="slds-text-body_small">{selected.entry}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <p class="slds-text-title">Exit criteria</p>
+                        <p class="slds-text-body_small">{selected.exit}</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

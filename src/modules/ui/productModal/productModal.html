@@ -1,0 +1,41 @@
+<template>
+    <lightning-modal-header label={heading}></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-p-around_x-small">
+            <template lwc:if={isAdd}>
+                <lightning-combobox
+                    label="Product"
+                    options={catalogOptions}
+                    value={name}
+                    onchange={handleNameChange}>
+                </lightning-combobox>
+            </template>
+            <template lwc:else>
+                <lightning-input label="Product" value={name} read-only></lightning-input>
+            </template>
+            <lightning-input
+                class="slds-m-top_x-small"
+                type="number"
+                label="Quantity"
+                value={quantity}
+                min="0"
+                onchange={handleQuantityChange}>
+            </lightning-input>
+            <lightning-input
+                class="slds-m-top_x-small"
+                type="number"
+                step="1"
+                label="Amount (USD)"
+                value={amount}
+                onchange={handleAmountChange}>
+            </lightning-input>
+            <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                The Opportunity total is a simple sum of line-item amounts.
+            </p>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+        <lightning-button class="slds-m-left_x-small" label="Save" variant="brand" onclick={handleSave}></lightning-button>
+    </lightning-modal-footer>
+</template>

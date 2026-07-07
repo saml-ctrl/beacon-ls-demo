@@ -1,0 +1,33 @@
+<template>
+    <lightning-modal-header label="Approve &amp; Assign Research Study"></lightning-modal-header>
+    <lightning-modal-body>
+        <template lwc:if={study}>
+            <div class="slds-p-around_x-small">
+                <p class="slds-text-heading_small slds-m-bottom_xx-small">{study.name}</p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_small">{studyMeta}</p>
+                <lightning-combobox
+                    label="Assign BD rep"
+                    placeholder="Select a BD rep…"
+                    options={repOptions}
+                    value={selectedRep}
+                    required
+                    onchange={handleRepChange}>
+                </lightning-combobox>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                    Assignment is a human BD step — never automated prioritization. Assigning fires the
+                    one-time Clay enrichment for the study's PI / KOL Leads.
+                </p>
+            </div>
+        </template>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+        <lightning-button
+            class="slds-m-left_x-small"
+            label="Approve &amp; Assign"
+            variant="brand"
+            disabled={confirmDisabled}
+            onclick={handleAssign}>
+        </lightning-button>
+    </lightning-modal-footer>
+</template>

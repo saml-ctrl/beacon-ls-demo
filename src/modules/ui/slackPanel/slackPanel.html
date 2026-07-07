@@ -1,0 +1,45 @@
+<template>
+    <lightning-card icon-name="standard:slack" title="Slack">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template lwc:if={hasChannels}>
+                <template for:each={channels} for:item="channel">
+                    <div key={channel.id} class="c-slack-channel slds-m-bottom_small">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                            <span class="c-slack-channel__name">{channel.name}</span>
+                            <span class="slds-m-left_small slds-text-body_small slds-text-color_weak">{channel.purpose}</span>
+                        </div>
+                        <div class="slds-m-bottom_x-small">
+                            <template for:each={channel.memberList} for:item="member">
+                                <lightning-badge key={member.id} class="slds-m-right_xx-small" label={member.name}></lightning-badge>
+                            </template>
+                        </div>
+                        <ul>
+                            <template for:each={channel.messageList} for:item="message">
+                                <li key={message.id} class="c-slack-message">
+                                    <p class="slds-text-body_small">
+                                        <strong>{message.author}</strong>
+                                        <span class="slds-m-left_x-small slds-text-color_weak">{message.time}</span>
+                                    </p>
+                                    <p class="slds-text-body_small">{message.text}</p>
+                                </li>
+                            </template>
+                        </ul>
+                        <template lwc:if={channel.rulesLabel}>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">{channel.rulesLabel}</p>
+                        </template>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-color_weak slds-text-body_small">
+                    A Slack record channel is created automatically when this Opportunity advances past Qualification.
+                </p>
+            </template>
+            <ui-integration-badge
+                label="Salesforce ↔ Slack"
+                direction="outbound"
+                note="Record channel auto-created past Qualification; up to two notification rules (Closed Won, Closed Lost).">
+            </ui-integration-badge>
+        </div>
+    </lightning-card>
+</template>
